@@ -1193,9 +1193,10 @@
     });
   }
 
-  function layout(content, narrow = false) {
+  function layout(content, narrow = false, scrollToTop = true) {
+    const scrollTop = window.scrollY;
     app.innerHTML = `<div class="page ${narrow ? "page-narrow" : ""}">${content}</div>`;
-    window.scrollTo({ top: 0, behavior: "instant" });
+    window.scrollTo({ top: scrollToTop ? 0 : scrollTop, behavior: "instant" });
   }
 
   function renderHome() {
@@ -1274,22 +1275,26 @@
       <div class="toolbar">
         <div class="field"><label for="flash-theme">Thème</label><select id="flash-theme">${themeOptions()}</select></div>
         <div class="field"><label for="flash-filter">Cartes à afficher</label><select id="flash-filter"><option value="all">Toutes les cartes</option><option value="review">À revoir</option><option value="due">Prévues aujourd’hui</option><option value="unseen">Pas encore vues</option><option value="known">Maîtrisées</option></select></div>
-        <div class="field"><label for="flash-wording">Formulation</label><select id="flash-wording"><option value="mixed">Mixte : officielle et reformulée</option><option value="official">Toujours officielle</option><option value="alternate">Reformulée si disponible</option></select></div>
+        <div class="field"><label for="flash-origin">Origine</label><select id="flash-origin"><option value="all">Officielles + entraînement</option><option value="official">Questions officielles uniquement</option><option value="training">Situations d’entraînement uniquement</option></select></div>
+        <div class="field"><label for="flash-wording">Formulation</label><select id="flash-wording"><option value="mixed">Mixte : d’origine et reformulée</option><option value="original">Toujours la formulation d’origine</option><option value="alternate">Reformulée si disponible</option></select></div>
         <button class="button" id="start-flash" type="button">Lancer la révision</button>
       </div>
       <div id="flash-zone"></div>
     `);
     document.querySelector("#flash-theme").value = themes[preset] ? preset : "all";
     document.querySelector("#flash-filter").value = ["all", "review", "due", "unseen", "known"].includes(presetFilter) ? presetFilter : "all";
-    document.querySelector("#start-flash").addEventListener("click", startFlashcards);
+    document.querySelector("#start-flash").addEventListener("click", () => startFlashcards(true));
     startFlashcards();
   }
 
-  function startFlashcards() {
+  function startFlashcards(scrollToCards = false) {
     const theme = document.querySelector("#flash-theme").value;
     const filter = document.querySelector("#flash-filter").value;
+    const origin = document.querySelector("#flash-origin").value;
     const wording = document.querySelector("#flash-wording").value;
     let pool = (["review", "due"].includes(filter) ? reviewableQuestions : cardQuestions).filter(q => theme === "all" || q.theme === theme);
+    if (origin === "official") pool = pool.filter(q => q.official);
+    if (origin === "training") pool = pool.filter(q => q.type === "situation");
     if (filter === "review") pool = pool.filter(q => progress.review.includes(q.id) || isDue(q.id));
     if (filter === "due") pool = pool.filter(q => isDue(q.id));
     if (filter === "unseen") pool = pool.filter(q => !progress.seen.includes(q.id));
@@ -1303,6 +1308,10 @@
     }));
     flashSession = { ids, wordings, translations: {}, index: 0, revealed: false };
     renderFlashcard();
+    if (scrollToCards && window.matchMedia("(max-width: 800px)").matches) {
+      const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+      window.requestAnimationFrame(() => document.querySelector("#flash-zone")?.scrollIntoView({ behavior, block: "start" }));
+    }
   }
 
   function renderFlashcard() {
@@ -1313,7 +1322,7 @@
     }
     if (flashSession.index >= flashSession.ids.length) {
       zone.innerHTML = `<div class="result-hero" style="--result-color:var(--green)"><p class="eyebrow">Session terminée</p><h2>Révision enregistrée</h2><p>Les prochaines cartes seront proposées selon vos réponses et leur date de révision.</p><button class="button" id="restart-flash" type="button">Nouvelle session</button></div>`;
-      document.querySelector("#restart-flash").addEventListener("click", startFlashcards);
+      document.querySelector("#restart-flash").addEventListener("click", () => startFlashcards(true));
       return;
     }
     const q = getQuestion(flashSession.ids[flashSession.index]);
@@ -1409,7 +1418,8 @@
     renderPracticeQuestion();
   }
 
-  function renderPracticeQuestion() {
+  function renderPracticeQuestion(preserveScroll = false) {
+    const scrollTop = window.scrollY;
     const zone = document.querySelector("#practice-zone");
     if (practiceSession.index >= practiceSession.ids.length) {
       zone.innerHTML = `<div class="result-hero" style="--result-color:${practiceSession.score >= practiceSession.ids.length * .8 ? "var(--green)" : "var(--orange)"}">
@@ -1436,6 +1446,7 @@
     </div>`;
     document.querySelectorAll("[data-choice]").forEach(btn => btn.addEventListener("click", () => answerPractice(Number(btn.dataset.choice))));
     document.querySelector("#practice-next")?.addEventListener("click", () => { practiceSession.index++; practiceSession.revealed = false; renderPracticeQuestion(); });
+    if (preserveScroll) window.scrollTo({ top: scrollTop, behavior: "instant" });
   }
 
   function answerPractice(choice) {
@@ -1448,24 +1459,37 @@
     uniquePush(progress.seen, q.id);
     if (choice !== q.answer) uniquePush(progress.review, q.id);
     saveProgress();
-    renderPracticeQuestion();
+    renderPracticeQuestion(true);
   }
 
-  function createExam() {
+  function createExam(mode = "mixed") {
     const pool = (theme, type) => qcmQuestions.filter(q => q.theme === theme && q.type === type);
-    const picked = [
-      ...sample(pool("t1", "knowledge"), 5), ...sample(pool("t1", "situation"), 6),
-      ...sample(pool("t2", "knowledge"), 6),
-      ...sample(pool("t3", "knowledge"), 5), ...sample(pool("t3", "situation"), 6),
-      ...sample(pool("t4", "knowledge"), 8), ...sample(pool("t5", "knowledge"), 4)
-    ];
+    const picked = mode === "official"
+      ? [
+          ...sample(pool("t1", "knowledge"), 11), ...sample(pool("t2", "knowledge"), 6),
+          ...sample(pool("t3", "knowledge"), 11), ...sample(pool("t4", "knowledge"), 8),
+          ...sample(pool("t5", "knowledge"), 4)
+        ]
+      : [
+          ...sample(pool("t1", "knowledge"), 5), ...sample(pool("t1", "situation"), 6),
+          ...sample(pool("t2", "knowledge"), 6),
+          ...sample(pool("t3", "knowledge"), 5), ...sample(pool("t3", "situation"), 6),
+          ...sample(pool("t4", "knowledge"), 8), ...sample(pool("t5", "knowledge"), 4)
+        ];
     const ids = shuffle(picked).map(q => q.id);
     const wordings = Object.fromEntries(ids.map(id => {
       const q = getQuestion(id);
       const alternate = alternateWording(q.q);
-      return [id, alternate !== q.q && Math.random() < .35 ? alternate : q.q];
+      return [id, mode === "mixed" && alternate !== q.q && Math.random() < .35 ? alternate : q.q];
     }));
-    return { ids, wordings, answers: {}, flagged: [], index: 0, startedAt: Date.now(), duration: 45 * 60 * 1000 };
+    return { mode, ids, wordings, answers: {}, flagged: [], index: 0, startedAt: Date.now(), duration: 45 * 60 * 1000 };
+  }
+
+  function examModeNote(mode) {
+    if (mode === "official") {
+      return "<strong>Connaissances officielles uniquement</strong>Ce tirage exclut les situations d’entraînement. Les notions viennent de la liste publique du ministère ; leur présentation et les choix de réponses sont adaptés au format QCM, car le questionnaire complet de l’examen n’est pas publié.";
+    }
+    return "<strong>Simulation pédagogique mixte</strong>Le tirage associe des questions de connaissance issues de la liste publique et des mises en situation originales, signalées comme telles.";
   }
 
   function loadExam() {
@@ -1488,20 +1512,26 @@
         <div class="card"><span class="card-icon">45</span><h3>45 minutes</h3><p>Le chronomètre continue si vous rechargez la page.</p></div>
         <div class="card"><span class="card-icon">80</span><h3>80 % requis</h3><p>Il faut obtenir au moins 32 réponses correctes.</p></div>
       </div>
-      <div class="notice notice-warning"><strong>Simulation pédagogique</strong>Les questions de connaissance s’appuient sur la liste publique. Les mises en situation sont des entraînements originaux, car les questions officielles correspondantes ne sont pas publiées.</div>
+      <div class="toolbar">
+        <div class="field field-grow"><label for="exam-mode">Contenu de l’examen</label><select id="exam-mode"><option value="mixed">Mixte : connaissances + situations</option><option value="official">Connaissances officielles uniquement</option></select></div>
+      </div>
+      <div class="notice notice-warning" id="exam-mode-note" aria-live="polite">${examModeNote(active?.mode || "mixed")}</div>
       <div class="actions">
         ${active ? '<button class="button" id="resume-exam" type="button">Reprendre l’examen</button><button class="button button-secondary" id="new-exam" type="button">Recommencer</button>' : '<button class="button" id="new-exam" type="button">Démarrer l’examen</button>'}
       </div>
     `, true);
+    const modeSelect = document.querySelector("#exam-mode");
+    modeSelect.value = active?.mode || "mixed";
+    modeSelect.addEventListener("change", () => { document.querySelector("#exam-mode-note").innerHTML = examModeNote(modeSelect.value); });
     document.querySelector("#resume-exam")?.addEventListener("click", renderExamSession);
     document.querySelector("#new-exam")?.addEventListener("click", () => {
       if (active && !confirm("Recommencer supprimera la session actuelle. Continuer ?")) return;
-      saveExam(createExam());
+      saveExam(createExam(modeSelect.value));
       renderExamSession();
     });
   }
 
-  function renderExamSession() {
+  function renderExamSession(preserveScroll = false) {
     let exam = loadExam();
     if (!exam) { renderExamLanding(); return; }
     if (Date.now() - exam.startedAt >= exam.duration) { finishExam(true); return; }
@@ -1509,12 +1539,13 @@
     const displayedQuestion = exam.wordings?.[q.id] || q.q;
     const isReworded = displayedQuestion !== q.q;
     const selected = exam.answers[q.id];
+    const officialMode = (exam.mode || "mixed") === "official";
     layout(`<div class="question-shell">
       <div class="question-topbar"><div><strong>Examen blanc</strong><br><span>Question ${exam.index + 1} sur 40</span></div><span class="timer" id="exam-timer" role="timer">45:00</span></div>
       <div class="progress"><span style="width:${percent(Object.keys(exam.answers).length, 40)}%"></span></div>
       <div class="exam-map" aria-label="Navigation entre les questions">${exam.ids.map((id, i) => `<button type="button" data-exam-index="${i}" class="${i === exam.index ? "current" : ""} ${exam.answers[id] !== undefined ? "answered" : ""} ${exam.flagged.includes(id) ? "flagged" : ""}" aria-label="Question ${i + 1}${exam.answers[id] !== undefined ? ", répondue" : ""}">${i + 1}</button>`).join("")}</div>
       <article class="question-card">
-        <div>${tag(q)} ${isReworded ? '<span class="tag tag-reworded">Formulation d’entraînement</span>' : ""}</div><h2>${displayedQuestion}</h2>
+        <div>${tag(q)} ${officialMode ? '<span class="tag tag-official">Connaissance officielle · QCM adapté</span>' : ""} ${isReworded ? '<span class="tag tag-reworded">Formulation d’entraînement</span>' : ""}</div><h2>${displayedQuestion}</h2>
         <div class="choices">${q.choices.map((choice, i) => `<button class="choice ${selected === i ? "selected" : ""}" data-exam-choice="${i}" type="button"><span class="choice-letter">${LETTERS[i]}</span><span>${choice}</span></button>`).join("")}</div>
         <button class="flag-button" id="flag-question" type="button">${exam.flagged.includes(q.id) ? "Retirer le repère" : "Marquer pour y revenir"}</button>
         <div class="question-nav">
@@ -1522,16 +1553,16 @@
           ${exam.index === 39 ? '<button class="button" id="finish-exam" type="button">Terminer l’examen</button>' : '<button class="button" id="exam-next" type="button">Suivante →</button>'}
         </div>
       </article>
-    </div>`, true);
+    </div>`, true, !preserveScroll);
     startTimer();
     document.querySelectorAll("[data-exam-choice]").forEach(btn => btn.addEventListener("click", () => {
-      exam = loadExam(); exam.answers[q.id] = Number(btn.dataset.examChoice); saveExam(exam); renderExamSession();
+      exam = loadExam(); exam.answers[q.id] = Number(btn.dataset.examChoice); saveExam(exam); renderExamSession(true);
     }));
     document.querySelectorAll("[data-exam-index]").forEach(btn => btn.addEventListener("click", () => { exam = loadExam(); exam.index = Number(btn.dataset.examIndex); saveExam(exam); renderExamSession(); }));
     document.querySelector("#exam-prev").addEventListener("click", () => { exam = loadExam(); exam.index--; saveExam(exam); renderExamSession(); });
     document.querySelector("#exam-next")?.addEventListener("click", () => { exam = loadExam(); exam.index++; saveExam(exam); renderExamSession(); });
     document.querySelector("#flag-question").addEventListener("click", () => {
-      exam = loadExam(); exam.flagged.includes(q.id) ? removeFrom(exam.flagged, q.id) : uniquePush(exam.flagged, q.id); saveExam(exam); renderExamSession();
+      exam = loadExam(); exam.flagged.includes(q.id) ? removeFrom(exam.flagged, q.id) : uniquePush(exam.flagged, q.id); saveExam(exam); renderExamSession(true);
     });
     document.querySelector("#finish-exam")?.addEventListener("click", () => {
       const unanswered = 40 - Object.keys(loadExam().answers).length;
@@ -1562,8 +1593,8 @@
     const exam = loadExam();
     if (!exam) return;
     const score = exam.ids.reduce((sum, id) => sum + (exam.answers[id] === getQuestion(id).answer ? 1 : 0), 0);
-    const result = { date: new Date().toISOString(), score, ids: exam.ids, answers: exam.answers, timeUp };
-    progress.exams.push({ date: result.date, score });
+    const result = { date: new Date().toISOString(), score, ids: exam.ids, answers: exam.answers, timeUp, mode: exam.mode || "mixed" };
+    progress.exams.push({ date: result.date, score, mode: result.mode });
     if (progress.exams.length > 20) progress.exams = progress.exams.slice(-20);
     exam.ids.forEach(id => {
       uniquePush(progress.seen, id);

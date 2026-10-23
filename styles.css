@@ -81,7 +81,7 @@ button:focus-visible, a:focus-visible, select:focus-visible, input:focus-visible
 .nav-icon { display: none; width: 21px; height: 21px; fill: currentColor; }
 .icon-button { width: 42px; height: 42px; border: 0; background: var(--blue-soft); color: var(--blue); display: grid; place-items: center; cursor: pointer; border-radius: var(--radius); }
 .icon-button svg { width: 22px; fill: currentColor; }
-.install-button { width: auto; min-width: 42px; padding: 0 .8rem; display: inline-flex; gap: .45rem; font-weight: 700; }
+.install-button { width: auto; min-width: 42px; padding: 0 .8rem; display: inline-flex; justify-content: center; gap: .45rem; font-weight: 700; }
 .install-button[hidden] { display: none; }
 .install-button svg { flex: 0 0 auto; }
 main { min-height: calc(100vh - 250px); }
@@ -137,9 +137,11 @@ h3 { font-size: 1.2rem; }
 .notice-warning { border-color: var(--orange); background: var(--orange-soft); }
 .toolbar { display: flex; flex-wrap: wrap; gap: 1.25rem; align-items: end; margin: 2.5rem 0; padding: 1.5rem; background: var(--surface-alt); }
 .field { display: grid; gap: .55rem; min-width: 220px; }
+.field-grow { flex: 1 1 340px; }
 .field label { font-size: .86rem; font-weight: 700; }
 .field select { border: 1px solid var(--ink); background: var(--surface); color: var(--ink); min-height: 48px; padding: .75rem 2.75rem .75rem .85rem; line-height: 1.35; }
 .study-shell { max-width: 820px; margin: 2rem auto 0; }
+#flash-zone { scroll-margin-top: calc(84px + env(safe-area-inset-top)); }
 .study-meta { display: flex; justify-content: space-between; gap: 1rem; color: var(--muted); margin-bottom: .7rem; font-size: .9rem; }
 .flashcard { min-height: 355px; border: 2px solid var(--blue); background: var(--surface); padding: clamp(1.5rem, 5vw, 3.2rem); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; box-shadow: 10px 10px 0 var(--blue-soft); }
 .flash-tags { display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem; margin-bottom: 1.35rem; }
