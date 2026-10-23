@@ -13,6 +13,7 @@
   let timerId = null;
   let flashSession = null;
   let practiceSession = null;
+  let activeUtterance = null;
 
   const sourceUrls = {
     livret: "https://www.legifrance.gouv.fr/download/pdf?id=isr0azgWEe4wSbu_Z-hm_3tIAj0JcaOEDqWIfclQeWk=",
@@ -1132,6 +1133,72 @@
     return `<div class="short-answer"><span>Réponse à retenir</span><strong>${answer}</strong></div>${acceptedAnswers}<section class="explanation-box" aria-live="polite"><div class="explanation-heading"><h3>${showEnglish ? "To understand" : "Pour comprendre"}</h3><button class="translation-button" id="toggle-translation" type="button" lang="${showEnglish ? "en" : "fr"}">${showEnglish ? "Lire en français" : "Read in English"}</button></div><p class="explanation-main" lang="${showEnglish ? "en" : "fr"}">${showEnglish ? why.en : why.fr}</p>${context}<aside class="trap-box" lang="${showEnglish ? "en" : "fr"}"><strong>${showEnglish ? "Common trap" : "Piège fréquent"}</strong><p>${showEnglish ? trap.en : trap.fr}</p></aside></section><div class="answer-sources"><a href="${sourceUrls[q.source]}" target="_blank" rel="noopener">${sourceLabel} <span aria-hidden="true">↗</span></a>${externalLink}</div>${attribution}`;
   }
 
+  function practiceFeedback(q, selected, isReworded) {
+    const correct = selected === q.answer;
+    const why = whyExplanation(q).fr;
+    const trap = commonTrap(q).fr;
+    const external = externalSource(q);
+    const externalLink = external ? `<a href="${external.url}" target="_blank" rel="noopener">${external.label} <span aria-hidden="true">↗</span></a>` : "";
+    const context = why !== q.explanation ? `<div class="feedback-context"><strong>Pour mieux comprendre</strong><p>${why}</p></div>` : "";
+    return `<section class="feedback ${correct ? "" : "incorrect"}" aria-label="Correction">
+      <h3>${correct ? "Bonne réponse" : "Réponse incorrecte"}</h3>
+      <div class="feedback-answer"><span>Réponse à retenir</span><strong>${q.choices[q.answer]}</strong></div>
+      ${isReworded ? `<p class="official-wording"><strong>Formulation d’origine :</strong> ${q.q}</p>` : ""}
+      <div class="feedback-explanation"><strong>Pourquoi&nbsp;?</strong><p>${q.explanation}</p></div>
+      ${context}
+      <aside class="trap-box"><strong>Piège fréquent</strong><p>${trap}</p></aside>
+      <div class="answer-sources"><a href="${sourceUrls[q.source]}" target="_blank" rel="noopener">Voir la source officielle <span aria-hidden="true">↗</span></a>${externalLink}</div>
+    </section>`;
+  }
+
+  function speechButton() {
+    if (!("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window)) return "";
+    return `<div class="question-audio"><button class="listen-button" id="listen-question" type="button" aria-label="Lire la question à voix haute" aria-pressed="false"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4Zm11.5-.5a5 5 0 0 1 0 7l1.4 1.4a7 7 0 0 0 0-9.8l-1.4 1.4Zm2.8-2.8a9 9 0 0 1 0 12.6l1.4 1.4a11 11 0 0 0 0-15.4l-1.4 1.4Z"/></svg><span>Écouter</span></button></div>`;
+  }
+
+  function stopSpeech() {
+    if (!("speechSynthesis" in window)) return;
+    window.speechSynthesis.cancel();
+    activeUtterance = null;
+  }
+
+  function bindSpeechButton(text) {
+    const button = document.querySelector("#listen-question");
+    if (!button) return;
+    button.addEventListener("click", () => {
+      if (activeUtterance) {
+        stopSpeech();
+        button.classList.remove("is-speaking");
+        button.setAttribute("aria-pressed", "false");
+        button.setAttribute("aria-label", "Lire la question à voix haute");
+        button.querySelector("span").textContent = "Écouter";
+        return;
+      }
+      const utterance = new SpeechSynthesisUtterance(text);
+      const voice = window.speechSynthesis.getVoices().find(item => item.lang?.toLowerCase().startsWith("fr"));
+      utterance.lang = "fr-FR";
+      utterance.rate = .95;
+      if (voice) utterance.voice = voice;
+      const reset = () => {
+        if (activeUtterance !== utterance) return;
+        activeUtterance = null;
+        if (!button.isConnected) return;
+        button.classList.remove("is-speaking");
+        button.setAttribute("aria-pressed", "false");
+        button.setAttribute("aria-label", "Lire la question à voix haute");
+        button.querySelector("span").textContent = "Écouter";
+      };
+      utterance.addEventListener("end", reset);
+      utterance.addEventListener("error", reset);
+      activeUtterance = utterance;
+      button.classList.add("is-speaking");
+      button.setAttribute("aria-pressed", "true");
+      button.setAttribute("aria-label", "Arrêter la lecture de la question");
+      button.querySelector("span").textContent = "Arrêter";
+      window.speechSynthesis.speak(utterance);
+    });
+  }
+
   function alternateWording(question) {
     const rules = [
       [/^En quelle année (.+?)\s*\?$/i, "À quelle date $1 ?"],
@@ -1193,9 +1260,10 @@
     });
   }
 
-  function layout(content, narrow = false) {
+  function layout(content, narrow = false, scrollToTop = true) {
+    const scrollTop = window.scrollY;
     app.innerHTML = `<div class="page ${narrow ? "page-narrow" : ""}">${content}</div>`;
-    window.scrollTo({ top: 0, behavior: "instant" });
+    window.scrollTo({ top: scrollToTop ? 0 : scrollTop, behavior: "instant" });
   }
 
   function renderHome() {
@@ -1274,22 +1342,26 @@
       <div class="toolbar">
         <div class="field"><label for="flash-theme">Thème</label><select id="flash-theme">${themeOptions()}</select></div>
         <div class="field"><label for="flash-filter">Cartes à afficher</label><select id="flash-filter"><option value="all">Toutes les cartes</option><option value="review">À revoir</option><option value="due">Prévues aujourd’hui</option><option value="unseen">Pas encore vues</option><option value="known">Maîtrisées</option></select></div>
-        <div class="field"><label for="flash-wording">Formulation</label><select id="flash-wording"><option value="mixed">Mixte : officielle et reformulée</option><option value="official">Toujours officielle</option><option value="alternate">Reformulée si disponible</option></select></div>
+        <div class="field"><label for="flash-origin">Origine</label><select id="flash-origin"><option value="all">Officielles + entraînement</option><option value="official">Questions officielles uniquement</option><option value="training">Situations d’entraînement uniquement</option></select></div>
+        <div class="field"><label for="flash-wording">Formulation</label><select id="flash-wording"><option value="mixed">Mixte : d’origine et reformulée</option><option value="original">Toujours la formulation d’origine</option><option value="alternate">Reformulée si disponible</option></select></div>
         <button class="button" id="start-flash" type="button">Lancer la révision</button>
       </div>
       <div id="flash-zone"></div>
     `);
     document.querySelector("#flash-theme").value = themes[preset] ? preset : "all";
     document.querySelector("#flash-filter").value = ["all", "review", "due", "unseen", "known"].includes(presetFilter) ? presetFilter : "all";
-    document.querySelector("#start-flash").addEventListener("click", startFlashcards);
+    document.querySelector("#start-flash").addEventListener("click", () => startFlashcards(true));
     startFlashcards();
   }
 
-  function startFlashcards() {
+  function startFlashcards(scrollToCards = false) {
     const theme = document.querySelector("#flash-theme").value;
     const filter = document.querySelector("#flash-filter").value;
+    const origin = document.querySelector("#flash-origin").value;
     const wording = document.querySelector("#flash-wording").value;
     let pool = (["review", "due"].includes(filter) ? reviewableQuestions : cardQuestions).filter(q => theme === "all" || q.theme === theme);
+    if (origin === "official") pool = pool.filter(q => q.official);
+    if (origin === "training") pool = pool.filter(q => q.type === "situation");
     if (filter === "review") pool = pool.filter(q => progress.review.includes(q.id) || isDue(q.id));
     if (filter === "due") pool = pool.filter(q => isDue(q.id));
     if (filter === "unseen") pool = pool.filter(q => !progress.seen.includes(q.id));
@@ -1303,9 +1375,14 @@
     }));
     flashSession = { ids, wordings, translations: {}, index: 0, revealed: false };
     renderFlashcard();
+    if (scrollToCards && window.matchMedia("(max-width: 800px)").matches) {
+      const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+      window.requestAnimationFrame(() => document.querySelector("#flash-zone")?.scrollIntoView({ behavior, block: "start" }));
+    }
   }
 
   function renderFlashcard() {
+    stopSpeech();
     const zone = document.querySelector("#flash-zone");
     if (!flashSession.ids.length) {
       zone.innerHTML = `<div class="empty"><h2>Aucune carte ici</h2><p>Essayez un autre filtre ou un autre thème.</p></div>`;
@@ -1313,7 +1390,7 @@
     }
     if (flashSession.index >= flashSession.ids.length) {
       zone.innerHTML = `<div class="result-hero" style="--result-color:var(--green)"><p class="eyebrow">Session terminée</p><h2>Révision enregistrée</h2><p>Les prochaines cartes seront proposées selon vos réponses et leur date de révision.</p><button class="button" id="restart-flash" type="button">Nouvelle session</button></div>`;
-      document.querySelector("#restart-flash").addEventListener("click", startFlashcards);
+      document.querySelector("#restart-flash").addEventListener("click", () => startFlashcards(true));
       return;
     }
     const q = getQuestion(flashSession.ids[flashSession.index]);
@@ -1324,6 +1401,7 @@
       <div class="progress"><span style="width:${percent(flashSession.index + 1, flashSession.ids.length)}%"></span></div>
       <article class="flashcard" aria-labelledby="flash-question">
         <div class="flash-tags">${tag(q)} ${isReworded ? '<span class="tag tag-reworded">Formulation d’entraînement</span>' : ""}</div>
+        ${speechButton()}
         <h2 id="flash-question">${displayedQuestion}</h2>
         ${flashSession.revealed ? `<div class="answer">${isReworded ? `<p class="official-wording"><strong>Formulation officielle :</strong> ${q.q}</p>` : ""}${flashAnswer(q, !!flashSession.translations[q.id])}</div>` : '<button class="button button-secondary reveal-button" id="flip-card" type="button" aria-expanded="false">Afficher la réponse</button>'}
       </article>
@@ -1338,6 +1416,7 @@
         <button class="button button-ghost" id="next-card" type="button" ${flashSession.index === flashSession.ids.length - 1 ? "disabled" : ""}>Suivante →</button>
       </div>
     </div>`;
+    bindSpeechButton(displayedQuestion);
     document.querySelector("#flip-card")?.addEventListener("click", () => { flashSession.revealed = true; uniquePush(progress.seen, q.id); saveProgress(); renderFlashcard(); });
     document.querySelector("#toggle-translation")?.addEventListener("click", () => { flashSession.translations[q.id] = !flashSession.translations[q.id]; renderFlashcard(); });
     document.querySelector("#prev-card").addEventListener("click", () => { flashSession.index--; flashSession.revealed = false; renderFlashcard(); });
@@ -1409,7 +1488,9 @@
     renderPracticeQuestion();
   }
 
-  function renderPracticeQuestion() {
+  function renderPracticeQuestion(preserveScroll = false) {
+    stopSpeech();
+    const scrollTop = window.scrollY;
     const zone = document.querySelector("#practice-zone");
     if (practiceSession.index >= practiceSession.ids.length) {
       zone.innerHTML = `<div class="result-hero" style="--result-color:${practiceSession.score >= practiceSession.ids.length * .8 ? "var(--green)" : "var(--orange)"}">
@@ -1428,14 +1509,16 @@
       <div class="question-topbar"><span>Question ${practiceSession.index + 1}/${practiceSession.ids.length}</span><strong>${practiceSession.score} bonne${practiceSession.score > 1 ? "s" : ""} réponse${practiceSession.score > 1 ? "s" : ""}</strong></div>
       <div class="progress"><span style="width:${percent(practiceSession.index, practiceSession.ids.length)}%"></span></div>
       <article class="question-card">
-        <div>${tag(q)} ${isReworded ? '<span class="tag tag-reworded">Formulation d’entraînement</span>' : ""}</div><h2>${displayedQuestion}</h2>
+        <div>${tag(q)} ${isReworded ? '<span class="tag tag-reworded">Formulation d’entraînement</span>' : ""}</div>${speechButton()}<h2>${displayedQuestion}</h2>
         <div class="choices">${q.choices.map((choice, i) => `<button class="choice ${practiceSession.revealed ? (i === q.answer ? "correct" : i === selected ? "incorrect" : "") : ""}" data-choice="${i}" type="button" ${practiceSession.revealed ? "disabled" : ""}><span class="choice-letter">${LETTERS[i]}</span><span>${choice}</span></button>`).join("")}</div>
-        ${practiceSession.revealed ? `<div class="feedback ${selected === q.answer ? "" : "incorrect"}"><strong>${selected === q.answer ? "Bonne réponse" : "Réponse incorrecte"}</strong>${isReworded ? `<p><strong>Formulation d’origine :</strong> ${q.q}</p>` : ""}<p>${q.explanation}</p><a href="${sourceUrls[q.source]}" target="_blank" rel="noopener">Voir la source officielle ↗</a></div>` : ""}
+        ${practiceSession.revealed ? practiceFeedback(q, selected, isReworded) : ""}
         <div class="question-nav"><span></span>${practiceSession.revealed ? '<button class="button" id="practice-next" type="button">Question suivante →</button>' : ""}</div>
       </article>
     </div>`;
+    bindSpeechButton(displayedQuestion);
     document.querySelectorAll("[data-choice]").forEach(btn => btn.addEventListener("click", () => answerPractice(Number(btn.dataset.choice))));
     document.querySelector("#practice-next")?.addEventListener("click", () => { practiceSession.index++; practiceSession.revealed = false; renderPracticeQuestion(); });
+    if (preserveScroll) window.scrollTo({ top: scrollTop, behavior: "instant" });
   }
 
   function answerPractice(choice) {
@@ -1448,24 +1531,37 @@
     uniquePush(progress.seen, q.id);
     if (choice !== q.answer) uniquePush(progress.review, q.id);
     saveProgress();
-    renderPracticeQuestion();
+    renderPracticeQuestion(true);
   }
 
-  function createExam() {
+  function createExam(mode = "mixed") {
     const pool = (theme, type) => qcmQuestions.filter(q => q.theme === theme && q.type === type);
-    const picked = [
-      ...sample(pool("t1", "knowledge"), 5), ...sample(pool("t1", "situation"), 6),
-      ...sample(pool("t2", "knowledge"), 6),
-      ...sample(pool("t3", "knowledge"), 5), ...sample(pool("t3", "situation"), 6),
-      ...sample(pool("t4", "knowledge"), 8), ...sample(pool("t5", "knowledge"), 4)
-    ];
+    const picked = mode === "official"
+      ? [
+          ...sample(pool("t1", "knowledge"), 11), ...sample(pool("t2", "knowledge"), 6),
+          ...sample(pool("t3", "knowledge"), 11), ...sample(pool("t4", "knowledge"), 8),
+          ...sample(pool("t5", "knowledge"), 4)
+        ]
+      : [
+          ...sample(pool("t1", "knowledge"), 5), ...sample(pool("t1", "situation"), 6),
+          ...sample(pool("t2", "knowledge"), 6),
+          ...sample(pool("t3", "knowledge"), 5), ...sample(pool("t3", "situation"), 6),
+          ...sample(pool("t4", "knowledge"), 8), ...sample(pool("t5", "knowledge"), 4)
+        ];
     const ids = shuffle(picked).map(q => q.id);
     const wordings = Object.fromEntries(ids.map(id => {
       const q = getQuestion(id);
       const alternate = alternateWording(q.q);
-      return [id, alternate !== q.q && Math.random() < .35 ? alternate : q.q];
+      return [id, mode === "mixed" && alternate !== q.q && Math.random() < .35 ? alternate : q.q];
     }));
-    return { ids, wordings, answers: {}, flagged: [], index: 0, startedAt: Date.now(), duration: 45 * 60 * 1000 };
+    return { mode, ids, wordings, answers: {}, flagged: [], index: 0, startedAt: Date.now(), duration: 45 * 60 * 1000 };
+  }
+
+  function examModeNote(mode) {
+    if (mode === "official") {
+      return "<strong>Connaissances officielles uniquement</strong>Ce tirage exclut les situations d’entraînement. Les notions viennent de la liste publique du ministère ; leur présentation et les choix de réponses sont adaptés au format QCM, car le questionnaire complet de l’examen n’est pas publié.";
+    }
+    return "<strong>Simulation pédagogique mixte</strong>Le tirage associe des questions de connaissance issues de la liste publique et des mises en situation originales, signalées comme telles.";
   }
 
   function loadExam() {
@@ -1488,20 +1584,27 @@
         <div class="card"><span class="card-icon">45</span><h3>45 minutes</h3><p>Le chronomètre continue si vous rechargez la page.</p></div>
         <div class="card"><span class="card-icon">80</span><h3>80 % requis</h3><p>Il faut obtenir au moins 32 réponses correctes.</p></div>
       </div>
-      <div class="notice notice-warning"><strong>Simulation pédagogique</strong>Les questions de connaissance s’appuient sur la liste publique. Les mises en situation sont des entraînements originaux, car les questions officielles correspondantes ne sont pas publiées.</div>
+      <div class="toolbar">
+        <div class="field field-grow"><label for="exam-mode">Contenu de l’examen</label><select id="exam-mode"><option value="mixed">Mixte : connaissances + situations</option><option value="official">Connaissances officielles uniquement</option></select></div>
+      </div>
+      <div class="notice notice-warning" id="exam-mode-note" aria-live="polite">${examModeNote(active?.mode || "mixed")}</div>
       <div class="actions">
         ${active ? '<button class="button" id="resume-exam" type="button">Reprendre l’examen</button><button class="button button-secondary" id="new-exam" type="button">Recommencer</button>' : '<button class="button" id="new-exam" type="button">Démarrer l’examen</button>'}
       </div>
     `, true);
+    const modeSelect = document.querySelector("#exam-mode");
+    modeSelect.value = active?.mode || "mixed";
+    modeSelect.addEventListener("change", () => { document.querySelector("#exam-mode-note").innerHTML = examModeNote(modeSelect.value); });
     document.querySelector("#resume-exam")?.addEventListener("click", renderExamSession);
     document.querySelector("#new-exam")?.addEventListener("click", () => {
       if (active && !confirm("Recommencer supprimera la session actuelle. Continuer ?")) return;
-      saveExam(createExam());
+      saveExam(createExam(modeSelect.value));
       renderExamSession();
     });
   }
 
-  function renderExamSession() {
+  function renderExamSession(preserveScroll = false) {
+    stopSpeech();
     let exam = loadExam();
     if (!exam) { renderExamLanding(); return; }
     if (Date.now() - exam.startedAt >= exam.duration) { finishExam(true); return; }
@@ -1509,12 +1612,13 @@
     const displayedQuestion = exam.wordings?.[q.id] || q.q;
     const isReworded = displayedQuestion !== q.q;
     const selected = exam.answers[q.id];
+    const officialMode = (exam.mode || "mixed") === "official";
     layout(`<div class="question-shell">
       <div class="question-topbar"><div><strong>Examen blanc</strong><br><span>Question ${exam.index + 1} sur 40</span></div><span class="timer" id="exam-timer" role="timer">45:00</span></div>
       <div class="progress"><span style="width:${percent(Object.keys(exam.answers).length, 40)}%"></span></div>
       <div class="exam-map" aria-label="Navigation entre les questions">${exam.ids.map((id, i) => `<button type="button" data-exam-index="${i}" class="${i === exam.index ? "current" : ""} ${exam.answers[id] !== undefined ? "answered" : ""} ${exam.flagged.includes(id) ? "flagged" : ""}" aria-label="Question ${i + 1}${exam.answers[id] !== undefined ? ", répondue" : ""}">${i + 1}</button>`).join("")}</div>
       <article class="question-card">
-        <div>${tag(q)} ${isReworded ? '<span class="tag tag-reworded">Formulation d’entraînement</span>' : ""}</div><h2>${displayedQuestion}</h2>
+        <div>${tag(q)} ${officialMode ? '<span class="tag tag-official">Connaissance officielle · QCM adapté</span>' : ""} ${isReworded ? '<span class="tag tag-reworded">Formulation d’entraînement</span>' : ""}</div>${speechButton()}<h2>${displayedQuestion}</h2>
         <div class="choices">${q.choices.map((choice, i) => `<button class="choice ${selected === i ? "selected" : ""}" data-exam-choice="${i}" type="button"><span class="choice-letter">${LETTERS[i]}</span><span>${choice}</span></button>`).join("")}</div>
         <button class="flag-button" id="flag-question" type="button">${exam.flagged.includes(q.id) ? "Retirer le repère" : "Marquer pour y revenir"}</button>
         <div class="question-nav">
@@ -1522,16 +1626,17 @@
           ${exam.index === 39 ? '<button class="button" id="finish-exam" type="button">Terminer l’examen</button>' : '<button class="button" id="exam-next" type="button">Suivante →</button>'}
         </div>
       </article>
-    </div>`, true);
+    </div>`, true, !preserveScroll);
     startTimer();
+    bindSpeechButton(displayedQuestion);
     document.querySelectorAll("[data-exam-choice]").forEach(btn => btn.addEventListener("click", () => {
-      exam = loadExam(); exam.answers[q.id] = Number(btn.dataset.examChoice); saveExam(exam); renderExamSession();
+      exam = loadExam(); exam.answers[q.id] = Number(btn.dataset.examChoice); saveExam(exam); renderExamSession(true);
     }));
     document.querySelectorAll("[data-exam-index]").forEach(btn => btn.addEventListener("click", () => { exam = loadExam(); exam.index = Number(btn.dataset.examIndex); saveExam(exam); renderExamSession(); }));
     document.querySelector("#exam-prev").addEventListener("click", () => { exam = loadExam(); exam.index--; saveExam(exam); renderExamSession(); });
     document.querySelector("#exam-next")?.addEventListener("click", () => { exam = loadExam(); exam.index++; saveExam(exam); renderExamSession(); });
     document.querySelector("#flag-question").addEventListener("click", () => {
-      exam = loadExam(); exam.flagged.includes(q.id) ? removeFrom(exam.flagged, q.id) : uniquePush(exam.flagged, q.id); saveExam(exam); renderExamSession();
+      exam = loadExam(); exam.flagged.includes(q.id) ? removeFrom(exam.flagged, q.id) : uniquePush(exam.flagged, q.id); saveExam(exam); renderExamSession(true);
     });
     document.querySelector("#finish-exam")?.addEventListener("click", () => {
       const unanswered = 40 - Object.keys(loadExam().answers).length;
@@ -1562,8 +1667,8 @@
     const exam = loadExam();
     if (!exam) return;
     const score = exam.ids.reduce((sum, id) => sum + (exam.answers[id] === getQuestion(id).answer ? 1 : 0), 0);
-    const result = { date: new Date().toISOString(), score, ids: exam.ids, answers: exam.answers, timeUp };
-    progress.exams.push({ date: result.date, score });
+    const result = { date: new Date().toISOString(), score, ids: exam.ids, answers: exam.answers, timeUp, mode: exam.mode || "mixed" };
+    progress.exams.push({ date: result.date, score, mode: result.mode });
     if (progress.exams.length > 20) progress.exams = progress.exams.slice(-20);
     exam.ids.forEach(id => {
       uniquePush(progress.seen, id);
@@ -1678,6 +1783,7 @@
 
   function router() {
     clearInterval(timerId);
+    stopSpeech();
     const { path, params } = parseRoute();
     setActiveNav(path);
     if (path === "home") renderHome();
