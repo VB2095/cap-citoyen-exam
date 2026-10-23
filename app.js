@@ -13,6 +13,7 @@
   let timerId = null;
   let flashSession = null;
   let practiceSession = null;
+  let activeUtterance = null;
 
   const sourceUrls = {
     livret: "https://www.legifrance.gouv.fr/download/pdf?id=isr0azgWEe4wSbu_Z-hm_3tIAj0JcaOEDqWIfclQeWk=",
@@ -1132,6 +1133,72 @@
     return `<div class="short-answer"><span>Réponse à retenir</span><strong>${answer}</strong></div>${acceptedAnswers}<section class="explanation-box" aria-live="polite"><div class="explanation-heading"><h3>${showEnglish ? "To understand" : "Pour comprendre"}</h3><button class="translation-button" id="toggle-translation" type="button" lang="${showEnglish ? "en" : "fr"}">${showEnglish ? "Lire en français" : "Read in English"}</button></div><p class="explanation-main" lang="${showEnglish ? "en" : "fr"}">${showEnglish ? why.en : why.fr}</p>${context}<aside class="trap-box" lang="${showEnglish ? "en" : "fr"}"><strong>${showEnglish ? "Common trap" : "Piège fréquent"}</strong><p>${showEnglish ? trap.en : trap.fr}</p></aside></section><div class="answer-sources"><a href="${sourceUrls[q.source]}" target="_blank" rel="noopener">${sourceLabel} <span aria-hidden="true">↗</span></a>${externalLink}</div>${attribution}`;
   }
 
+  function practiceFeedback(q, selected, isReworded) {
+    const correct = selected === q.answer;
+    const why = whyExplanation(q).fr;
+    const trap = commonTrap(q).fr;
+    const external = externalSource(q);
+    const externalLink = external ? `<a href="${external.url}" target="_blank" rel="noopener">${external.label} <span aria-hidden="true">↗</span></a>` : "";
+    const context = why !== q.explanation ? `<div class="feedback-context"><strong>Pour mieux comprendre</strong><p>${why}</p></div>` : "";
+    return `<section class="feedback ${correct ? "" : "incorrect"}" aria-label="Correction">
+      <h3>${correct ? "Bonne réponse" : "Réponse incorrecte"}</h3>
+      <div class="feedback-answer"><span>Réponse à retenir</span><strong>${q.choices[q.answer]}</strong></div>
+      ${isReworded ? `<p class="official-wording"><strong>Formulation d’origine :</strong> ${q.q}</p>` : ""}
+      <div class="feedback-explanation"><strong>Pourquoi&nbsp;?</strong><p>${q.explanation}</p></div>
+      ${context}
+      <aside class="trap-box"><strong>Piège fréquent</strong><p>${trap}</p></aside>
+      <div class="answer-sources"><a href="${sourceUrls[q.source]}" target="_blank" rel="noopener">Voir la source officielle <span aria-hidden="true">↗</span></a>${externalLink}</div>
+    </section>`;
+  }
+
+  function speechButton() {
+    if (!("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window)) return "";
+    return `<div class="question-audio"><button class="listen-button" id="listen-question" type="button" aria-label="Lire la question à voix haute" aria-pressed="false"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4Zm11.5-.5a5 5 0 0 1 0 7l1.4 1.4a7 7 0 0 0 0-9.8l-1.4 1.4Zm2.8-2.8a9 9 0 0 1 0 12.6l1.4 1.4a11 11 0 0 0 0-15.4l-1.4 1.4Z"/></svg><span>Écouter</span></button></div>`;
+  }
+
+  function stopSpeech() {
+    if (!("speechSynthesis" in window)) return;
+    window.speechSynthesis.cancel();
+    activeUtterance = null;
+  }
+
+  function bindSpeechButton(text) {
+    const button = document.querySelector("#listen-question");
+    if (!button) return;
+    button.addEventListener("click", () => {
+      if (activeUtterance) {
+        stopSpeech();
+        button.classList.remove("is-speaking");
+        button.setAttribute("aria-pressed", "false");
+        button.setAttribute("aria-label", "Lire la question à voix haute");
+        button.querySelector("span").textContent = "Écouter";
+        return;
+      }
+      const utterance = new SpeechSynthesisUtterance(text);
+      const voice = window.speechSynthesis.getVoices().find(item => item.lang?.toLowerCase().startsWith("fr"));
+      utterance.lang = "fr-FR";
+      utterance.rate = .95;
+      if (voice) utterance.voice = voice;
+      const reset = () => {
+        if (activeUtterance !== utterance) return;
+        activeUtterance = null;
+        if (!button.isConnected) return;
+        button.classList.remove("is-speaking");
+        button.setAttribute("aria-pressed", "false");
+        button.setAttribute("aria-label", "Lire la question à voix haute");
+        button.querySelector("span").textContent = "Écouter";
+      };
+      utterance.addEventListener("end", reset);
+      utterance.addEventListener("error", reset);
+      activeUtterance = utterance;
+      button.classList.add("is-speaking");
+      button.setAttribute("aria-pressed", "true");
+      button.setAttribute("aria-label", "Arrêter la lecture de la question");
+      button.querySelector("span").textContent = "Arrêter";
+      window.speechSynthesis.speak(utterance);
+    });
+  }
+
   function alternateWording(question) {
     const rules = [
       [/^En quelle année (.+?)\s*\?$/i, "À quelle date $1 ?"],
@@ -1315,6 +1382,7 @@
   }
 
   function renderFlashcard() {
+    stopSpeech();
     const zone = document.querySelector("#flash-zone");
     if (!flashSession.ids.length) {
       zone.innerHTML = `<div class="empty"><h2>Aucune carte ici</h2><p>Essayez un autre filtre ou un autre thème.</p></div>`;
@@ -1333,6 +1401,7 @@
       <div class="progress"><span style="width:${percent(flashSession.index + 1, flashSession.ids.length)}%"></span></div>
       <article class="flashcard" aria-labelledby="flash-question">
         <div class="flash-tags">${tag(q)} ${isReworded ? '<span class="tag tag-reworded">Formulation d’entraînement</span>' : ""}</div>
+        ${speechButton()}
         <h2 id="flash-question">${displayedQuestion}</h2>
         ${flashSession.revealed ? `<div class="answer">${isReworded ? `<p class="official-wording"><strong>Formulation officielle :</strong> ${q.q}</p>` : ""}${flashAnswer(q, !!flashSession.translations[q.id])}</div>` : '<button class="button button-secondary reveal-button" id="flip-card" type="button" aria-expanded="false">Afficher la réponse</button>'}
       </article>
@@ -1347,6 +1416,7 @@
         <button class="button button-ghost" id="next-card" type="button" ${flashSession.index === flashSession.ids.length - 1 ? "disabled" : ""}>Suivante →</button>
       </div>
     </div>`;
+    bindSpeechButton(displayedQuestion);
     document.querySelector("#flip-card")?.addEventListener("click", () => { flashSession.revealed = true; uniquePush(progress.seen, q.id); saveProgress(); renderFlashcard(); });
     document.querySelector("#toggle-translation")?.addEventListener("click", () => { flashSession.translations[q.id] = !flashSession.translations[q.id]; renderFlashcard(); });
     document.querySelector("#prev-card").addEventListener("click", () => { flashSession.index--; flashSession.revealed = false; renderFlashcard(); });
@@ -1419,6 +1489,7 @@
   }
 
   function renderPracticeQuestion(preserveScroll = false) {
+    stopSpeech();
     const scrollTop = window.scrollY;
     const zone = document.querySelector("#practice-zone");
     if (practiceSession.index >= practiceSession.ids.length) {
@@ -1438,12 +1509,13 @@
       <div class="question-topbar"><span>Question ${practiceSession.index + 1}/${practiceSession.ids.length}</span><strong>${practiceSession.score} bonne${practiceSession.score > 1 ? "s" : ""} réponse${practiceSession.score > 1 ? "s" : ""}</strong></div>
       <div class="progress"><span style="width:${percent(practiceSession.index, practiceSession.ids.length)}%"></span></div>
       <article class="question-card">
-        <div>${tag(q)} ${isReworded ? '<span class="tag tag-reworded">Formulation d’entraînement</span>' : ""}</div><h2>${displayedQuestion}</h2>
+        <div>${tag(q)} ${isReworded ? '<span class="tag tag-reworded">Formulation d’entraînement</span>' : ""}</div>${speechButton()}<h2>${displayedQuestion}</h2>
         <div class="choices">${q.choices.map((choice, i) => `<button class="choice ${practiceSession.revealed ? (i === q.answer ? "correct" : i === selected ? "incorrect" : "") : ""}" data-choice="${i}" type="button" ${practiceSession.revealed ? "disabled" : ""}><span class="choice-letter">${LETTERS[i]}</span><span>${choice}</span></button>`).join("")}</div>
-        ${practiceSession.revealed ? `<div class="feedback ${selected === q.answer ? "" : "incorrect"}"><strong>${selected === q.answer ? "Bonne réponse" : "Réponse incorrecte"}</strong>${isReworded ? `<p><strong>Formulation d’origine :</strong> ${q.q}</p>` : ""}<p>${q.explanation}</p><a href="${sourceUrls[q.source]}" target="_blank" rel="noopener">Voir la source officielle ↗</a></div>` : ""}
+        ${practiceSession.revealed ? practiceFeedback(q, selected, isReworded) : ""}
         <div class="question-nav"><span></span>${practiceSession.revealed ? '<button class="button" id="practice-next" type="button">Question suivante →</button>' : ""}</div>
       </article>
     </div>`;
+    bindSpeechButton(displayedQuestion);
     document.querySelectorAll("[data-choice]").forEach(btn => btn.addEventListener("click", () => answerPractice(Number(btn.dataset.choice))));
     document.querySelector("#practice-next")?.addEventListener("click", () => { practiceSession.index++; practiceSession.revealed = false; renderPracticeQuestion(); });
     if (preserveScroll) window.scrollTo({ top: scrollTop, behavior: "instant" });
@@ -1532,6 +1604,7 @@
   }
 
   function renderExamSession(preserveScroll = false) {
+    stopSpeech();
     let exam = loadExam();
     if (!exam) { renderExamLanding(); return; }
     if (Date.now() - exam.startedAt >= exam.duration) { finishExam(true); return; }
@@ -1545,7 +1618,7 @@
       <div class="progress"><span style="width:${percent(Object.keys(exam.answers).length, 40)}%"></span></div>
       <div class="exam-map" aria-label="Navigation entre les questions">${exam.ids.map((id, i) => `<button type="button" data-exam-index="${i}" class="${i === exam.index ? "current" : ""} ${exam.answers[id] !== undefined ? "answered" : ""} ${exam.flagged.includes(id) ? "flagged" : ""}" aria-label="Question ${i + 1}${exam.answers[id] !== undefined ? ", répondue" : ""}">${i + 1}</button>`).join("")}</div>
       <article class="question-card">
-        <div>${tag(q)} ${officialMode ? '<span class="tag tag-official">Connaissance officielle · QCM adapté</span>' : ""} ${isReworded ? '<span class="tag tag-reworded">Formulation d’entraînement</span>' : ""}</div><h2>${displayedQuestion}</h2>
+        <div>${tag(q)} ${officialMode ? '<span class="tag tag-official">Connaissance officielle · QCM adapté</span>' : ""} ${isReworded ? '<span class="tag tag-reworded">Formulation d’entraînement</span>' : ""}</div>${speechButton()}<h2>${displayedQuestion}</h2>
         <div class="choices">${q.choices.map((choice, i) => `<button class="choice ${selected === i ? "selected" : ""}" data-exam-choice="${i}" type="button"><span class="choice-letter">${LETTERS[i]}</span><span>${choice}</span></button>`).join("")}</div>
         <button class="flag-button" id="flag-question" type="button">${exam.flagged.includes(q.id) ? "Retirer le repère" : "Marquer pour y revenir"}</button>
         <div class="question-nav">
@@ -1555,6 +1628,7 @@
       </article>
     </div>`, true, !preserveScroll);
     startTimer();
+    bindSpeechButton(displayedQuestion);
     document.querySelectorAll("[data-exam-choice]").forEach(btn => btn.addEventListener("click", () => {
       exam = loadExam(); exam.answers[q.id] = Number(btn.dataset.examChoice); saveExam(exam); renderExamSession(true);
     }));
@@ -1709,6 +1783,7 @@
 
   function router() {
     clearInterval(timerId);
+    stopSpeech();
     const { path, params } = parseRoute();
     setActiveNav(path);
     if (path === "home") renderHome();

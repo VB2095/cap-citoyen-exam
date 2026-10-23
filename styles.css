@@ -145,6 +145,10 @@ h3 { font-size: 1.2rem; }
 .study-meta { display: flex; justify-content: space-between; gap: 1rem; color: var(--muted); margin-bottom: .7rem; font-size: .9rem; }
 .flashcard { min-height: 355px; border: 2px solid var(--blue); background: var(--surface); padding: clamp(1.5rem, 5vw, 3.2rem); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; box-shadow: 10px 10px 0 var(--blue-soft); }
 .flash-tags { display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem; margin-bottom: 1.35rem; }
+.question-audio { width: 100%; max-width: 680px; display: flex; justify-content: flex-end; margin: 0 0 .75rem; }
+.listen-button { min-height: 40px; display: inline-flex; align-items: center; justify-content: center; gap: .45rem; padding: .45rem .7rem; border: 1px solid var(--blue); background: transparent; color: var(--blue); font-weight: 700; cursor: pointer; }
+.listen-button:hover, .listen-button.is-speaking { background: var(--blue-soft); }
+.listen-button svg { width: 20px; height: 20px; fill: currentColor; }
 .flashcard h2 { max-width: 680px; margin-bottom: 1.75rem; }
 .flashcard .answer { width: 100%; border-top: 1px solid var(--border); padding-top: 1.75rem; margin-top: .25rem; max-width: 680px; text-align: left; }
 .flashcard .answer > *:first-child { margin-top: 0; }
@@ -208,9 +212,18 @@ h3 { font-size: 1.2rem; }
 [data-theme="dark"] .choice.correct { color: var(--ink); }
 .choice.incorrect { border: 2px solid var(--red); background: var(--orange-soft); }
 .choice-letter { width: 28px; height: 28px; flex: 0 0 auto; display: grid; place-items: center; border: 1px solid currentColor; font-weight: 800; }
-.feedback { padding: 1rem 1.25rem; border-left: 4px solid var(--green); background: var(--green-soft); margin-top: 1.25rem; }
+.feedback { padding: 1.25rem; border-left: 4px solid var(--green); background: color-mix(in srgb, var(--green-soft) 55%, var(--surface)); margin-top: 1.25rem; }
 .feedback.incorrect { border-color: var(--red); background: var(--orange-soft); }
+.feedback h3 { color: var(--green); margin-bottom: 1rem; }
+.feedback.incorrect h3 { color: var(--red); }
 .feedback p { margin: .4rem 0 0; }
+.feedback-answer { display: grid; gap: .3rem; padding: .85rem 1rem; background: var(--surface); border-left: 4px solid var(--green); }
+.feedback-answer span { color: var(--muted); font-size: .78rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+.feedback-explanation, .feedback-context { margin-top: 1.2rem; }
+.feedback-explanation > strong, .feedback-context > strong { color: var(--blue); }
+.feedback .official-wording { margin-top: 1.2rem; margin-bottom: 0; }
+.feedback .trap-box { background: color-mix(in srgb, var(--orange-soft) 75%, var(--surface)); }
+.feedback .answer-sources { margin-top: 1.2rem; }
 .question-nav { display: flex; justify-content: space-between; gap: 1rem; margin-top: 1.5rem; }
 .exam-map { display: flex; flex-wrap: wrap; gap: .45rem; margin: 1.5rem 0; }
 .exam-map button { width: 36px; height: 36px; border: 1px solid var(--border); background: var(--surface); color: var(--ink); cursor: pointer; }
