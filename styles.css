@@ -93,7 +93,7 @@ h1 { font-size: clamp(2.1rem, 5vw, 3.8rem); max-width: 850px; margin-bottom: 1.2
 h2 { font-size: clamp(1.6rem, 3vw, 2.25rem); margin-bottom: 1rem; }
 h3 { font-size: 1.2rem; }
 .lead { font-size: clamp(1.08rem, 2vw, 1.3rem); max-width: 760px; color: var(--muted); margin: 0 0 2rem; }
-.hero { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(280px, .75fr); gap: 3rem; align-items: center; padding-top: 2.5rem; }
+.hero { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(280px, .75fr); gap: 3rem; align-items: center; }
 .hero-card { background: var(--blue); color: #fff; padding: 2rem; box-shadow: 12px 12px 0 var(--blue-soft); }
 [data-theme="dark"] .hero-card { color: #fff; background: #000091; }
 .exam-number { font-size: 4rem; line-height: 1; font-weight: 700; display: block; }
@@ -157,6 +157,9 @@ h3 { font-size: 1.2rem; }
 .explanation-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: .8rem; }
 .explanation-heading h3 { margin: 0; font-size: 1.1rem; }
 .explanation-box p { margin: 0; }
+.explanation-main { font-size: 1.02rem; line-height: 1.65; }
+.context-note { margin-top: 1rem !important; padding-top: 1rem; border-top: 1px solid color-mix(in srgb, var(--blue) 28%, transparent); }
+.context-note strong { display: block; margin-bottom: .35rem; color: var(--blue); }
 .explanation-box .why-note { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid color-mix(in srgb, var(--blue) 28%, transparent); }
 .why-note strong { display: block; margin-bottom: .35rem; color: var(--blue); }
 .trap-box { margin-top: 1.2rem; padding: 1rem; background: var(--orange-soft); border-left: 4px solid var(--orange); }
