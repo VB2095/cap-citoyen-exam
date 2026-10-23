@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Réviser l'examen civique de naturalisation avec des flashcards et des examens blancs conformes au format officiel.">
+  <meta name="theme-color" content="#000091">
+  <title>Cap Citoyen — Réviser l'examen civique</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Aller au contenu</a>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="#/" aria-label="Cap Citoyen — Accueil">
+        <span class="brand-mark" aria-hidden="true">CC</span>
+        <span><strong>Cap Citoyen</strong><small>Préparation à l'examen civique</small></span>
+      </a>
+      <nav class="main-nav" aria-label="Navigation principale">
+        <a href="#/reviser" data-nav="reviser">Réviser</a>
+        <a href="#/entrainement" data-nav="entrainement">S'entraîner</a>
+        <a href="#/examen" data-nav="examen">Examen blanc</a>
+      </nav>
+      <button class="icon-button theme-toggle" type="button" aria-label="Activer le thème sombre" title="Changer de thème">
+        <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36A7 7 0 0 1 13.36 3.1C12.92 3.04 12.46 3 12 3Z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="main" tabindex="-1">
+    <div id="app" aria-live="polite"></div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div>
+        <strong>Cap Citoyen</strong>
+        <p>Outil indépendant d'entraînement. Ce site n'est pas un service officiel de l'administration française.</p>
+        <p class="attribution">Questions : ministère de l’Intérieur · Réponses pédagogiques complémentaires : <a href="https://leqcmcivique.fr" target="_blank" rel="noopener">leqcmcivique.fr</a>, Licence Ouverte 2.0.</p>
+      </div>
+      <nav aria-label="Navigation secondaire">
+        <a href="#/sources">Sources officielles</a>
+        <button class="link-button" id="reset-progress" type="button">Réinitialiser ma progression</button>
+      </nav>
+    </div>
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="official-bank.js"></script>
+  <script src="questions.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
