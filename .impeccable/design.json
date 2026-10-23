@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-23T00:00:00+02:00",
+  "title": "Design System: Cap Citoyen",
+  "extensions": {
+    "colorMeta": {
+      "republic-blue": {
+        "role": "primary",
+        "displayName": "Bleu République",
+        "canonical": "#000091",
+        "tonalRamp": ["#00002e", "#00005c", "#000091", "#1212ff", "#6a6af4", "#9a9aff", "#cacafb", "#ececfe"]
+      },
+      "success-green": {
+        "role": "secondary",
+        "displayName": "Vert réussite",
+        "canonical": "#18753c",
+        "tonalRamp": ["#072b16", "#0e4d29", "#18753c", "#27a658", "#3bea7e", "#86f3aa", "#b8fec9", "#e5fdeb"]
+      },
+      "warning-orange": {
+        "role": "tertiary",
+        "displayName": "Orange vigilance",
+        "canonical": "#b34000",
+        "tonalRamp": ["#3f1600", "#702800", "#b34000", "#e66a2c", "#ff8c68", "#ffb7a5", "#fee9e6", "#fff4f2"]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Encre principale",
+        "canonical": "#161616",
+        "tonalRamp": ["#161616", "#2a2a2a", "#3a3a3a", "#666666", "#929292", "#cecece", "#e5e5e5", "#f6f6f6"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Titre de page", "purpose": "Donner immédiatement le sujet et la priorité de la page." },
+      "body": { "displayName": "Lecture pédagogique", "purpose": "Rendre questions et explications confortables sur toutes les tailles." },
+      "label": { "displayName": "Repère fonctionnel", "purpose": "Identifier clairement champs, statuts et métadonnées." }
+    },
+    "shadows": [
+      { "name": "functional-elevation", "value": "0 8px 24px rgba(0, 0, 18, .08)", "purpose": "Dialogues, notifications et élévation interactive uniquement." }
+    ],
+    "motion": [
+      { "name": "progress", "value": "transform .3s ease-out", "purpose": "Progression fluide sans recalcul de mise en page." },
+      { "name": "reduced-motion", "value": "none", "purpose": "Suppression des transitions lorsque l’utilisateur le demande." }
+    ],
+    "breakpoints": [
+      { "name": "mobile-navigation", "value": "800px" },
+      { "name": "single-column", "value": "540px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Action principale d’un parcours.",
+      "html": "<button class=\"ds-btn-primary\">Commencer</button>",
+      "css": ".ds-btn-primary { min-height: 44px; padding: .65rem 1rem; border: 2px solid var(--blue, #000091); border-radius: 0; background: var(--blue, #000091); color: #fff; font: 700 1rem/1.55 Arial, sans-serif; cursor: pointer; box-shadow: inset 0 -2px 0 rgba(0,0,0,.2); } .ds-btn-primary:hover { background: var(--blue-hover, #1212ff); border-color: var(--blue-hover, #1212ff); } .ds-btn-primary:focus-visible { outline: 2px solid #0a76f6; outline-offset: 2px; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Action alternative qui ne concurrence pas l’action principale.",
+      "html": "<button class=\"ds-btn-secondary\">Voir les détails</button>",
+      "css": ".ds-btn-secondary { min-height: 44px; padding: .65rem 1rem; border: 2px solid var(--blue, #000091); border-radius: 0; background: transparent; color: var(--blue, #000091); font: 700 1rem/1.55 Arial, sans-serif; cursor: pointer; } .ds-btn-secondary:hover { background: var(--blue-soft, #ececfe); } .ds-btn-secondary:focus-visible { outline: 2px solid #0a76f6; outline-offset: 2px; }"
+    },
+    {
+      "name": "Select Field",
+      "kind": "input",
+      "refersTo": "field",
+      "description": "Filtre fluide conçu pour rester utilisable avec le texte agrandi.",
+      "html": "<label class=\"ds-field\">Thème<select><option>Tous les thèmes</option></select></label>",
+      "css": ".ds-field { display: grid; gap: .55rem; color: var(--ink, #161616); font: 700 .86rem/1.35 Arial, sans-serif; } .ds-field select { width: 100%; min-width: 0; min-height: 48px; padding: .75rem 2.75rem .75rem .85rem; border: 1px solid var(--ink, #161616); border-radius: 0; background: var(--surface, #fff); color: var(--ink, #161616); font: 400 1rem/1.35 Arial, sans-serif; } .ds-field select:focus-visible { outline: 2px solid #0a76f6; outline-offset: 2px; }"
+    },
+    {
+      "name": "Status Tag",
+      "kind": "chip",
+      "description": "Métadonnée courte indiquant l’origine ou le statut d’une question.",
+      "html": "<span class=\"ds-tag\">Question officielle</span>",
+      "css": ".ds-tag { display: inline-flex; align-items: center; padding: .35rem .65rem; border-radius: 0; background: var(--green-soft, #b8fec9); color: #0b3b20; font: 700 .78rem/1.3 Arial, sans-serif; }"
+    },
+    {
+      "name": "Learning Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Surface de question avec accent supérieur porteur de sens.",
+      "html": "<article class=\"ds-card\"><h2>Question de révision</h2><p>Contenu pédagogique concis et lisible.</p></article>",
+      "css": ".ds-card { padding: 1.5rem; border: 1px solid var(--border, #ddd); border-top: 4px solid var(--blue, #000091); border-radius: 0; background: var(--surface, #fff); color: var(--ink, #161616); font: 400 1rem/1.55 Arial, sans-serif; } .ds-card h2 { margin: 0 0 1rem; font-size: 1.2rem; line-height: 1.18; letter-spacing: -.025em; } .ds-card p { margin: 0; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Le Cahier civique",
+    "overview": "Cap Citoyen doit ressembler à un outil public de confiance que l’on peut annoter mentalement et reprendre chaque jour. L’interface est directe, structurée et rassurante : elle privilégie le contenu pédagogique, la progression et la réussite de la tâche plutôt que la décoration.\n\nLe langage visuel s’inspire fortement du DSFR sans revendiquer une conformité officielle. Les surfaces restent plates, les angles sont droits, le bleu républicain structure les actions et les couleurs sémantiques n’apparaissent que pour signaler un état réel.",
+    "keyCharacteristics": [
+      "Une hiérarchie éditoriale nette et lisible.",
+      "Des commandes tactiles généreuses et des parcours utilisables au clavier.",
+      "Une palette républicaine sobre, compatible avec les thèmes clair et sombre.",
+      "Des composants carrés, plats et séparés par l’espace avant la bordure."
+    ],
+    "rules": [
+      { "name": "Semantic Color", "body": "Le vert, l’orange et le rouge ne décorent jamais : ils communiquent toujours un état ou une conséquence.", "section": "colors" },
+      { "name": "Reading First", "body": "La taille et l’interligne servent d’abord la compréhension des questions et des explications ; aucun texte essentiel ne descend sous 1rem.", "section": "typography" },
+      { "name": "Flat by Default", "body": "Une surface au repos utilise soit une bordure, soit un fond distinct ; l’ombre signale une élévation ou une signature explicite.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do utiliser l’espace et la hiérarchie typographique avant d’ajouter une nouvelle bordure.",
+      "Do conserver des cibles tactiles d’au moins 44px pour les contrôles autonomes.",
+      "Do gérer explicitement le focus après chaque remplacement dynamique d’une question ou d’une réponse.",
+      "Do vérifier chaque composant dans les thèmes clair et sombre ainsi qu’avec un texte agrandi à 200 %."
+    ],
+    "donts": [
+      "Don't présenter Cap Citoyen comme un service officiel ou comme une implémentation certifiée du DSFR.",
+      "Don't placer aria-live sur la totalité d’une page ou d’un parcours interactif.",
+      "Don't empiler des bordures latérales colorées dans une même carte pédagogique.",
+      "Don't utiliser une largeur fixe ou une largeur minimale qui empêche le reflow du texte."
+    ]
+  }
+}

@@ -14,13 +14,16 @@
   let flashSession = null;
   let practiceSession = null;
   let activeUtterance = null;
+  let glossaryDataPromise = null;
+  let glossaryData = null;
 
   const sourceUrls = {
     livret: "https://www.legifrance.gouv.fr/download/pdf?id=isr0azgWEe4wSbu_Z-hm_3tIAj0JcaOEDqWIfclQeWk=",
     questions: "https://www.immigration.interieur.gouv.fr/documentation/guides-textes-et-brochures/questions-de-connaissance-pour-lexamen-civique-nationalite-francaise.html",
     arrete: "https://www.legifrance.gouv.fr/loda/id/LEGISCTA000052382278",
-    procedure: "https://www.immigration.interieur.gouv.fr/devenir-francais/procedures-dacces-a-nationalite-francaise"
-    ,officialData: "https://www.data.gouv.fr/datasets/examen-civique-naturalisation-questions-de-connaissances-officielles-et-propositions-de-reponses"
+    procedure: "https://www.immigration.interieur.gouv.fr/devenir-francais/procedures-dacces-a-nationalite-francaise",
+    officialData: "https://www.data.gouv.fr/datasets/examen-civique-naturalisation-questions-de-connaissances-officielles-et-propositions-de-reponses",
+    glossaryData: "https://www.data.gouv.fr/datasets/glossaire-de-lexamen-civique-notions-cles-pour-la-naturalisation-et-les-titres-de-sejour"
   };
 
   const contextNotes = [
@@ -1130,7 +1133,7 @@
       : "";
     const sourceLabel = q.answers ? "Source de la question et attribution" : "Source officielle";
     const attribution = q.answers ? `<p class="source-note">Réponse pédagogique indépendante proposée par leqcmcivique.fr ; l’administration ne publie pas de corrigé officiel.${external ? " La ressource Wikipédia apporte uniquement un contexte complémentaire." : ""}</p>` : "";
-    return `<div class="short-answer"><span>Réponse à retenir</span><strong>${answer}</strong></div>${acceptedAnswers}<section class="explanation-box" aria-live="polite"><div class="explanation-heading"><h3>${showEnglish ? "To understand" : "Pour comprendre"}</h3><button class="translation-button" id="toggle-translation" type="button" lang="${showEnglish ? "en" : "fr"}">${showEnglish ? "Lire en français" : "Read in English"}</button></div><p class="explanation-main" lang="${showEnglish ? "en" : "fr"}">${showEnglish ? why.en : why.fr}</p>${context}<aside class="trap-box" lang="${showEnglish ? "en" : "fr"}"><strong>${showEnglish ? "Common trap" : "Piège fréquent"}</strong><p>${showEnglish ? trap.en : trap.fr}</p></aside></section><div class="answer-sources"><a href="${sourceUrls[q.source]}" target="_blank" rel="noopener">${sourceLabel} <span aria-hidden="true">↗</span></a>${externalLink}</div>${attribution}`;
+    return `<div class="short-answer"><span>Réponse à retenir</span><strong>${answer}</strong></div>${acceptedAnswers}<section class="explanation-box"><div class="explanation-heading"><h3>${showEnglish ? "To understand" : "Pour comprendre"}</h3><button class="translation-button" id="toggle-translation" type="button" lang="${showEnglish ? "en" : "fr"}">${showEnglish ? "Lire en français" : "Read in English"}</button></div><p class="explanation-main" lang="${showEnglish ? "en" : "fr"}">${showEnglish ? why.en : why.fr}</p>${context}<aside class="trap-box" lang="${showEnglish ? "en" : "fr"}"><strong>${showEnglish ? "Common trap" : "Piège fréquent"}</strong><p>${showEnglish ? trap.en : trap.fr}</p></aside></section>${glossaryKnowledge(q)}<div class="answer-sources"><a href="${sourceUrls[q.source]}" target="_blank" rel="noopener">${sourceLabel} <span aria-hidden="true">↗</span></a>${externalLink}</div>${attribution}`;
   }
 
   function practiceFeedback(q, selected, isReworded) {
@@ -1147,6 +1150,7 @@
       <div class="feedback-explanation"><strong>Pourquoi&nbsp;?</strong><p>${q.explanation}</p></div>
       ${context}
       <aside class="trap-box"><strong>Piège fréquent</strong><p>${trap}</p></aside>
+      ${glossaryKnowledge(q)}
       <div class="answer-sources"><a href="${sourceUrls[q.source]}" target="_blank" rel="noopener">Voir la source officielle <span aria-hidden="true">↗</span></a>${externalLink}</div>
     </section>`;
   }
@@ -1266,6 +1270,135 @@
     window.scrollTo({ top: scrollToTop ? 0 : scrollTop, behavior: "instant" });
   }
 
+  function focusRendered(selector) {
+    if (!selector) return;
+    window.requestAnimationFrame(() => {
+      const target = document.querySelector(selector);
+      if (!target) return;
+      if (!target.matches("a, button, input, select, textarea, [tabindex]")) target.setAttribute("tabindex", "-1");
+      target.focus({ preventScroll: true });
+    });
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? "").replace(/[&<>'"]/g, character => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      "'": "&#39;",
+      '"': "&quot;"
+    })[character]);
+  }
+
+  function normalizeSearch(value) {
+    return String(value ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("fr");
+  }
+
+  function loadGlossaryData() {
+    if (!glossaryDataPromise) {
+      glossaryDataPromise = fetch("./data/glossaire-notions-civiques.json")
+        .then(response => {
+          if (!response.ok) throw new Error(`glossary-${response.status}`);
+          return response.json();
+        })
+        .then(data => {
+          if (!Array.isArray(data.entrees) || !data.metadata) throw new Error("glossary-invalid");
+          glossaryData = data;
+          return data;
+        })
+        .catch(error => {
+          glossaryDataPromise = null;
+          throw error;
+        });
+    }
+    return glossaryDataPromise;
+  }
+
+  const glossaryThemeIds = {
+    t1: "principes_valeurs",
+    t2: "institutions",
+    t3: "droits_devoirs",
+    t4: "histoire_geo_culture",
+    t5: "vie_en_societe"
+  };
+
+  const glossaryAliases = {
+    devise: ["liberte egalite fraternite"],
+    ddhc: ["declaration de 1789", "droits de l homme et du citoyen"],
+    "fete-nationale": ["14 juillet"],
+    "langue-francaise": ["langue francaise", "francais est la langue"],
+    "constitution-1958": ["constitution de 1958"],
+    "recensement-jdc": ["journee defense et citoyennete", "jdc"],
+    "guerres-mondiales": ["11 novembre 1918", "8 mai 1945"],
+    "cinquieme-republique": ["cinquieme republique", "5e republique"],
+    ivg: ["ivg"],
+    pacs: ["pacs"],
+    "assurance-maladie": ["carte vitale"],
+    "numeros-urgence": ["numero d urgence", "numeros d urgence"]
+  };
+
+  function normalizeKnowledgeText(value) {
+    return normalizeSearch(value)
+      .replace(/œ/g, "oe")
+      .replace(/[^a-z0-9]+/g, " ")
+      .trim();
+  }
+
+  function containsKnowledgePhrase(text, phrase) {
+    return ` ${text} `.includes(` ${phrase} `);
+  }
+
+  function glossaryEntryAliases(entry) {
+    const aliases = [normalizeKnowledgeText(entry.terme)];
+    const beforeParenthesis = normalizeKnowledgeText(entry.terme.split("(")[0]);
+    if (beforeParenthesis.length >= 4) aliases.push(beforeParenthesis);
+    for (const match of entry.terme.matchAll(/\(([^)]+)\)/g)) {
+      const parenthetical = normalizeKnowledgeText(match[1]);
+      if (parenthetical.length >= 3) aliases.push(parenthetical);
+    }
+    aliases.push(...(glossaryAliases[entry.slug] || []));
+    return [...new Set(aliases.filter(alias => alias.length >= 3))];
+  }
+
+  function glossaryEntriesForQuestion(q, limit = 3) {
+    if (!glossaryData?.entrees) return [];
+    const question = normalizeKnowledgeText(q.q);
+    const correctAnswer = normalizeKnowledgeText(q.answers?.join(" ") || q.choices?.[q.answer] || "");
+    const broadTerms = new Set(["loi", "maire", "euro", "region", "commune", "parlement", "gouvernement", "republique"]);
+
+    return glossaryData.entrees
+      .map(entry => {
+        let score = 0;
+        const isBroadTerm = broadTerms.has(entry.slug);
+        if (isBroadTerm && glossaryThemeIds[q.theme] !== entry.thematique) return { entry, score };
+        if (entry.slug === "parlement" && containsKnowledgePhrase(question, "parlement europeen")) return { entry, score };
+        for (const alias of glossaryEntryAliases(entry)) {
+          if (containsKnowledgePhrase(question, alias)) score = Math.max(score, 6);
+          else if (!isBroadTerm && containsKnowledgePhrase(correctAnswer, alias)) score = Math.max(score, 4);
+        }
+        if (score && glossaryThemeIds[q.theme] === entry.thematique) score += 1;
+        return { entry, score };
+      })
+      .filter(item => item.score > 0)
+      .sort((a, b) => b.score - a.score || a.entry.terme.localeCompare(b.entry.terme, "fr"))
+      .slice(0, limit)
+      .map(item => item.entry);
+  }
+
+  function glossaryKnowledge(q) {
+    const entries = glossaryEntriesForQuestion(q);
+    if (!entries.length) return "";
+    const items = entries.map(entry => `<article class="knowledge-entry">
+      <h4><a href="#/glossaire?notion=${encodeURIComponent(entry.slug)}">${escapeHtml(entry.terme)}</a></h4>
+      <p>${escapeHtml(entry.definition)}</p>
+      ${entry.reference ? `<p class="knowledge-reference"><strong>Référence :</strong> ${escapeHtml(entry.reference)}</p>` : ""}
+    </article>`).join("");
+    return `<details class="knowledge-panel">
+      <summary>Approfondir avec le glossaire · ${entries.length} notion${entries.length > 1 ? "s" : ""}</summary>
+      <div class="knowledge-content">${items}<p class="source-note">Définitions complémentaires produites par examenciviquenaturalisation.fr et publiées sous Licence Ouverte 2.0.</p></div>
+    </details>`;
+  }
+
   function renderHome() {
     const known = progress.known.length;
     const seen = progress.seen.length;
@@ -1282,7 +1415,7 @@
         <h3>${theme.name}</h3>
         <p>${officialCount} questions officielles${situationCount ? ` + ${situationCount} situations d’entraînement` : ""}</p>
         <p>${mastered} carte${mastered > 1 ? "s" : ""} maîtrisée${mastered > 1 ? "s" : ""} sur ${pool.length}</p>
-        <div class="progress" aria-label="${percent(mastered, pool.length)} % maîtrisé"><span style="width:${percent(mastered, pool.length)}%"></span></div>
+        <div class="progress" aria-label="${percent(mastered, pool.length)} % maîtrisé"><span style="--progress:${percent(mastered, pool.length) / 100}"></span></div>
       </a>`;
     }).join("");
 
@@ -1326,7 +1459,7 @@
       </section>
 
       <section class="section">
-        <div class="notice"><strong>Couverture intégrale</strong>Les 258 questions de connaissance publiées pour la naturalisation sont intégrées aux flashcards. Les réponses sont pédagogiques : l’administration publie les questions, mais pas de corrigé officiel.</div>
+        <div class="notice"><strong>Couverture intégrale</strong>Les 258 questions de connaissance publiées pour la naturalisation sont intégrées aux flashcards. Les réponses sont pédagogiques : l’administration publie les questions, mais pas de corrigé officiel. <a href="#/glossaire">Consulter également le glossaire des 81 notions civiques</a>.</div>
         <div class="notice notice-warning"><strong>Bon à savoir</strong>Les questions officielles de mise en situation ne sont pas publiques. Celles proposées ici sont des exercices originaux signalés comme tels.</div>
       </section>
     `);
@@ -1374,23 +1507,25 @@
       return [id, useAlternate ? alternate : q.q];
     }));
     flashSession = { ids, wordings, translations: {}, index: 0, revealed: false };
-    renderFlashcard();
+    renderFlashcard(scrollToCards ? "#flash-question" : null);
     if (scrollToCards && window.matchMedia("(max-width: 800px)").matches) {
       const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
       window.requestAnimationFrame(() => document.querySelector("#flash-zone")?.scrollIntoView({ behavior, block: "start" }));
     }
   }
 
-  function renderFlashcard() {
+  function renderFlashcard(focusTarget = null) {
     stopSpeech();
     const zone = document.querySelector("#flash-zone");
     if (!flashSession.ids.length) {
       zone.innerHTML = `<div class="empty"><h2>Aucune carte ici</h2><p>Essayez un autre filtre ou un autre thème.</p></div>`;
+      focusRendered(focusTarget || ".empty h2");
       return;
     }
     if (flashSession.index >= flashSession.ids.length) {
       zone.innerHTML = `<div class="result-hero" style="--result-color:var(--green)"><p class="eyebrow">Session terminée</p><h2>Révision enregistrée</h2><p>Les prochaines cartes seront proposées selon vos réponses et leur date de révision.</p><button class="button" id="restart-flash" type="button">Nouvelle session</button></div>`;
       document.querySelector("#restart-flash").addEventListener("click", () => startFlashcards(true));
+      focusRendered(focusTarget || ".result-hero h2");
       return;
     }
     const q = getQuestion(flashSession.ids[flashSession.index]);
@@ -1398,12 +1533,12 @@
     const isReworded = displayedQuestion !== q.q;
     zone.innerHTML = `<div class="study-shell">
       <div class="study-meta"><span>Carte ${flashSession.index + 1} sur ${flashSession.ids.length}</span><span>${cardStatus(q.id)}</span></div>
-      <div class="progress"><span style="width:${percent(flashSession.index + 1, flashSession.ids.length)}%"></span></div>
+      <div class="progress"><span style="--progress:${percent(flashSession.index + 1, flashSession.ids.length) / 100}"></span></div>
       <article class="flashcard" aria-labelledby="flash-question">
         <div class="flash-tags">${tag(q)} ${isReworded ? '<span class="tag tag-reworded">Formulation d’entraînement</span>' : ""}</div>
         ${speechButton()}
         <h2 id="flash-question">${displayedQuestion}</h2>
-        ${flashSession.revealed ? `<div class="answer">${isReworded ? `<p class="official-wording"><strong>Formulation officielle :</strong> ${q.q}</p>` : ""}${flashAnswer(q, !!flashSession.translations[q.id])}</div>` : '<button class="button button-secondary reveal-button" id="flip-card" type="button" aria-expanded="false">Afficher la réponse</button>'}
+        ${flashSession.revealed ? `<div class="answer" aria-label="Réponse affichée">${isReworded ? `<p class="official-wording"><strong>Formulation officielle :</strong> ${q.q}</p>` : ""}${flashAnswer(q, !!flashSession.translations[q.id])}</div>` : '<button class="button button-secondary reveal-button" id="flip-card" type="button" aria-expanded="false">Afficher la réponse</button>'}
       </article>
       ${flashSession.revealed ? `<fieldset class="rating-panel"><legend>Comment évaluez-vous votre réponse&nbsp;?</legend><div class="rating-grid">
         <button class="rating-button rating-again" data-rating="again" type="button"><strong>Je ne savais pas</strong><small>${intervalLabel(q.id, "again")}</small></button>
@@ -1417,11 +1552,12 @@
       </div>
     </div>`;
     bindSpeechButton(displayedQuestion);
-    document.querySelector("#flip-card")?.addEventListener("click", () => { flashSession.revealed = true; uniquePush(progress.seen, q.id); saveProgress(); renderFlashcard(); });
-    document.querySelector("#toggle-translation")?.addEventListener("click", () => { flashSession.translations[q.id] = !flashSession.translations[q.id]; renderFlashcard(); });
-    document.querySelector("#prev-card").addEventListener("click", () => { flashSession.index--; flashSession.revealed = false; renderFlashcard(); });
-    document.querySelector("#next-card").addEventListener("click", () => { flashSession.index++; flashSession.revealed = false; renderFlashcard(); });
+    document.querySelector("#flip-card")?.addEventListener("click", () => { flashSession.revealed = true; uniquePush(progress.seen, q.id); saveProgress(); renderFlashcard(".answer"); });
+    document.querySelector("#toggle-translation")?.addEventListener("click", () => { flashSession.translations[q.id] = !flashSession.translations[q.id]; renderFlashcard("#toggle-translation"); });
+    document.querySelector("#prev-card").addEventListener("click", () => { flashSession.index--; flashSession.revealed = false; renderFlashcard("#flash-question"); });
+    document.querySelector("#next-card").addEventListener("click", () => { flashSession.index++; flashSession.revealed = false; renderFlashcard("#flash-question"); });
     document.querySelectorAll("[data-rating]").forEach(button => button.addEventListener("click", () => rateCard(q.id, button.dataset.rating)));
+    focusRendered(focusTarget);
   }
 
   function rateCard(id, rating) {
@@ -1456,7 +1592,7 @@
     toast(messages[rating]);
     flashSession.index++;
     flashSession.revealed = false;
-    renderFlashcard();
+    renderFlashcard("#flash-question");
   }
 
   function renderPractice() {
@@ -1485,10 +1621,10 @@
       return [id, alternate !== q.q && Math.random() < .5 ? alternate : q.q];
     }));
     practiceSession = { ids, wordings, index: 0, answers: [], score: 0, revealed: false };
-    renderPracticeQuestion();
+    renderPracticeQuestion(false, ".question-card h2");
   }
 
-  function renderPracticeQuestion(preserveScroll = false) {
+  function renderPracticeQuestion(preserveScroll = false, focusTarget = null) {
     stopSpeech();
     const scrollTop = window.scrollY;
     const zone = document.querySelector("#practice-zone");
@@ -1499,6 +1635,7 @@
         <button class="button" id="restart-practice" type="button">Nouvelle série</button>
       </div>`;
       document.querySelector("#restart-practice").addEventListener("click", startPractice);
+      focusRendered(focusTarget || ".result-hero h2");
       return;
     }
     const q = getQuestion(practiceSession.ids[practiceSession.index]);
@@ -1507,7 +1644,7 @@
     const selected = practiceSession.answers[practiceSession.index];
     zone.innerHTML = `<div class="question-shell">
       <div class="question-topbar"><span>Question ${practiceSession.index + 1}/${practiceSession.ids.length}</span><strong>${practiceSession.score} bonne${practiceSession.score > 1 ? "s" : ""} réponse${practiceSession.score > 1 ? "s" : ""}</strong></div>
-      <div class="progress"><span style="width:${percent(practiceSession.index, practiceSession.ids.length)}%"></span></div>
+      <div class="progress"><span style="--progress:${percent(practiceSession.index, practiceSession.ids.length) / 100}"></span></div>
       <article class="question-card">
         <div>${tag(q)} ${isReworded ? '<span class="tag tag-reworded">Formulation d’entraînement</span>' : ""}</div>${speechButton()}<h2>${displayedQuestion}</h2>
         <div class="choices">${q.choices.map((choice, i) => `<button class="choice ${practiceSession.revealed ? (i === q.answer ? "correct" : i === selected ? "incorrect" : "") : ""}" data-choice="${i}" type="button" ${practiceSession.revealed ? "disabled" : ""}><span class="choice-letter">${LETTERS[i]}</span><span>${choice}</span></button>`).join("")}</div>
@@ -1517,8 +1654,9 @@
     </div>`;
     bindSpeechButton(displayedQuestion);
     document.querySelectorAll("[data-choice]").forEach(btn => btn.addEventListener("click", () => answerPractice(Number(btn.dataset.choice))));
-    document.querySelector("#practice-next")?.addEventListener("click", () => { practiceSession.index++; practiceSession.revealed = false; renderPracticeQuestion(); });
+    document.querySelector("#practice-next")?.addEventListener("click", () => { practiceSession.index++; practiceSession.revealed = false; renderPracticeQuestion(false, ".question-card h2"); });
     if (preserveScroll) window.scrollTo({ top: scrollTop, behavior: "instant" });
+    focusRendered(focusTarget);
   }
 
   function answerPractice(choice) {
@@ -1531,7 +1669,7 @@
     uniquePush(progress.seen, q.id);
     if (choice !== q.answer) uniquePush(progress.review, q.id);
     saveProgress();
-    renderPracticeQuestion(true);
+    renderPracticeQuestion(true, ".feedback");
   }
 
   function createExam(mode = "mixed") {
@@ -1580,9 +1718,9 @@
       <p class="lead">Un tirage de 40 questions, 45 minutes et une seule bonne réponse par question.</p>
       ${active ? '<div class="notice"><strong>Une session est en cours</strong>Vous pouvez reprendre exactement là où vous vous êtes arrêté.</div>' : ""}
       <div class="grid">
-        <div class="card"><span class="card-icon">40</span><h3>40 questions</h3><p>Selon la répartition officielle entre les cinq thèmes.</p></div>
-        <div class="card"><span class="card-icon">45</span><h3>45 minutes</h3><p>Le chronomètre continue si vous rechargez la page.</p></div>
-        <div class="card"><span class="card-icon">80</span><h3>80 % requis</h3><p>Il faut obtenir au moins 32 réponses correctes.</p></div>
+        <div class="card"><span class="card-icon">40</span><h2 class="card-title">40 questions</h2><p>Selon la répartition officielle entre les cinq thèmes.</p></div>
+        <div class="card"><span class="card-icon">45</span><h2 class="card-title">45 minutes</h2><p>Le chronomètre continue si vous rechargez la page.</p></div>
+        <div class="card"><span class="card-icon">80</span><h2 class="card-title">80 % requis</h2><p>Il faut obtenir au moins 32 réponses correctes.</p></div>
       </div>
       <div class="toolbar">
         <div class="field field-grow"><label for="exam-mode">Contenu de l’examen</label><select id="exam-mode"><option value="mixed">Mixte : connaissances + situations</option><option value="official">Connaissances officielles uniquement</option></select></div>
@@ -1595,15 +1733,15 @@
     const modeSelect = document.querySelector("#exam-mode");
     modeSelect.value = active?.mode || "mixed";
     modeSelect.addEventListener("change", () => { document.querySelector("#exam-mode-note").innerHTML = examModeNote(modeSelect.value); });
-    document.querySelector("#resume-exam")?.addEventListener("click", renderExamSession);
+    document.querySelector("#resume-exam")?.addEventListener("click", () => renderExamSession(false, ".question-card h2"));
     document.querySelector("#new-exam")?.addEventListener("click", () => {
       if (active && !confirm("Recommencer supprimera la session actuelle. Continuer ?")) return;
       saveExam(createExam(modeSelect.value));
-      renderExamSession();
+      renderExamSession(false, ".question-card h2");
     });
   }
 
-  function renderExamSession(preserveScroll = false) {
+  function renderExamSession(preserveScroll = false, focusTarget = null) {
     stopSpeech();
     let exam = loadExam();
     if (!exam) { renderExamLanding(); return; }
@@ -1615,11 +1753,11 @@
     const officialMode = (exam.mode || "mixed") === "official";
     layout(`<div class="question-shell">
       <div class="question-topbar"><div><strong>Examen blanc</strong><br><span>Question ${exam.index + 1} sur 40</span></div><span class="timer" id="exam-timer" role="timer">45:00</span></div>
-      <div class="progress"><span style="width:${percent(Object.keys(exam.answers).length, 40)}%"></span></div>
-      <div class="exam-map" aria-label="Navigation entre les questions">${exam.ids.map((id, i) => `<button type="button" data-exam-index="${i}" class="${i === exam.index ? "current" : ""} ${exam.answers[id] !== undefined ? "answered" : ""} ${exam.flagged.includes(id) ? "flagged" : ""}" aria-label="Question ${i + 1}${exam.answers[id] !== undefined ? ", répondue" : ""}">${i + 1}</button>`).join("")}</div>
+      <div class="progress"><span style="--progress:${percent(Object.keys(exam.answers).length, 40) / 100}"></span></div>
+      <div class="exam-map" aria-label="Navigation entre les questions">${exam.ids.map((id, i) => `<button type="button" data-exam-index="${i}" class="${i === exam.index ? "current" : ""} ${exam.answers[id] !== undefined ? "answered" : ""} ${exam.flagged.includes(id) ? "flagged" : ""}" aria-label="Question ${i + 1}${exam.answers[id] !== undefined ? ", répondue" : ""}" ${i === exam.index ? 'aria-current="step"' : ""}>${i + 1}</button>`).join("")}</div>
       <article class="question-card">
         <div>${tag(q)} ${officialMode ? '<span class="tag tag-official">Connaissance officielle · QCM adapté</span>' : ""} ${isReworded ? '<span class="tag tag-reworded">Formulation d’entraînement</span>' : ""}</div>${speechButton()}<h2>${displayedQuestion}</h2>
-        <div class="choices">${q.choices.map((choice, i) => `<button class="choice ${selected === i ? "selected" : ""}" data-exam-choice="${i}" type="button"><span class="choice-letter">${LETTERS[i]}</span><span>${choice}</span></button>`).join("")}</div>
+        <div class="choices">${q.choices.map((choice, i) => `<button class="choice ${selected === i ? "selected" : ""}" data-exam-choice="${i}" type="button" aria-pressed="${selected === i}"><span class="choice-letter">${LETTERS[i]}</span><span>${choice}</span></button>`).join("")}</div>
         <button class="flag-button" id="flag-question" type="button">${exam.flagged.includes(q.id) ? "Retirer le repère" : "Marquer pour y revenir"}</button>
         <div class="question-nav">
           <button class="button button-ghost" id="exam-prev" type="button" ${exam.index === 0 ? "disabled" : ""}>← Précédente</button>
@@ -1630,18 +1768,20 @@
     startTimer();
     bindSpeechButton(displayedQuestion);
     document.querySelectorAll("[data-exam-choice]").forEach(btn => btn.addEventListener("click", () => {
-      exam = loadExam(); exam.answers[q.id] = Number(btn.dataset.examChoice); saveExam(exam); renderExamSession(true);
+      const choice = Number(btn.dataset.examChoice);
+      exam = loadExam(); exam.answers[q.id] = choice; saveExam(exam); renderExamSession(true, `[data-exam-choice="${choice}"]`);
     }));
-    document.querySelectorAll("[data-exam-index]").forEach(btn => btn.addEventListener("click", () => { exam = loadExam(); exam.index = Number(btn.dataset.examIndex); saveExam(exam); renderExamSession(); }));
-    document.querySelector("#exam-prev").addEventListener("click", () => { exam = loadExam(); exam.index--; saveExam(exam); renderExamSession(); });
-    document.querySelector("#exam-next")?.addEventListener("click", () => { exam = loadExam(); exam.index++; saveExam(exam); renderExamSession(); });
+    document.querySelectorAll("[data-exam-index]").forEach(btn => btn.addEventListener("click", () => { exam = loadExam(); exam.index = Number(btn.dataset.examIndex); saveExam(exam); renderExamSession(false, ".question-card h2"); }));
+    document.querySelector("#exam-prev").addEventListener("click", () => { exam = loadExam(); exam.index--; saveExam(exam); renderExamSession(false, ".question-card h2"); });
+    document.querySelector("#exam-next")?.addEventListener("click", () => { exam = loadExam(); exam.index++; saveExam(exam); renderExamSession(false, ".question-card h2"); });
     document.querySelector("#flag-question").addEventListener("click", () => {
-      exam = loadExam(); exam.flagged.includes(q.id) ? removeFrom(exam.flagged, q.id) : uniquePush(exam.flagged, q.id); saveExam(exam); renderExamSession(true);
+      exam = loadExam(); exam.flagged.includes(q.id) ? removeFrom(exam.flagged, q.id) : uniquePush(exam.flagged, q.id); saveExam(exam); renderExamSession(true, "#flag-question");
     });
     document.querySelector("#finish-exam")?.addEventListener("click", () => {
       const unanswered = 40 - Object.keys(loadExam().answers).length;
       if (!unanswered || confirm(`Il reste ${unanswered} question${unanswered > 1 ? "s" : ""} sans réponse. Terminer quand même ?`)) finishExam(false);
     });
+    focusRendered(focusTarget);
   }
 
   function startTimer() {
@@ -1688,11 +1828,11 @@
     const breakdown = Object.entries(themes).map(([id, theme]) => {
       const ids = result.ids.filter(qid => getQuestion(qid).theme === id);
       const correct = ids.filter(qid => result.answers[qid] === getQuestion(qid).answer).length;
-      return `<div class="breakdown-row"><span>${theme.short}</span><div class="progress" style="--theme-color:${theme.color}"><span style="width:${percent(correct, ids.length)}%"></span></div><strong>${correct}/${ids.length}</strong></div>`;
+      return `<div class="breakdown-row"><span>${theme.short}</span><div class="progress" style="--theme-color:${theme.color}"><span style="--progress:${percent(correct, ids.length) / 100}"></span></div><strong>${correct}/${ids.length}</strong></div>`;
     }).join("");
     const review = result.ids.map((id, index) => {
       const q = getQuestion(id); const choice = result.answers[id]; const good = choice === q.answer;
-      return `<article class="review-item ${good ? "good" : "bad"}"><div>${tag(q)}</div><h3>${index + 1}. ${q.q}</h3><p><strong>Votre réponse :</strong> ${choice === undefined ? "Aucune réponse" : q.choices[choice]}</p>${!good ? `<p><strong>Bonne réponse :</strong> ${q.choices[q.answer]}</p>` : ""}<p>${q.explanation}</p></article>`;
+      return `<article class="review-item ${good ? "good" : "bad"}"><div>${tag(q)}</div><h3>${index + 1}. ${q.q}</h3><p><strong>Votre réponse :</strong> ${choice === undefined ? "Aucune réponse" : q.choices[choice]}</p>${!good ? `<p><strong>Bonne réponse :</strong> ${q.choices[q.answer]}</p>` : ""}<p>${q.explanation}</p>${glossaryKnowledge(q)}</article>`;
     }).join("");
     layout(`
       <div class="result-hero" style="--result-color:${passed ? "var(--green)" : "var(--orange)"}">
@@ -1718,10 +1858,118 @@
         <article class="source-item"><h3>${sources.questions}</h3><p>Intitulés publics des questions de connaissance classés par thème.</p><a href="${sourceUrls.questions}" target="_blank" rel="noopener">Consulter sur le site du ministère ↗</a></article>
         <article class="source-item"><h3>${sources.procedure}</h3><p>Informations pratiques concernant l’examen et l’accès à la nationalité française.</p><a href="${sourceUrls.procedure}" target="_blank" rel="noopener">Consulter sur le site du ministère ↗</a></article>
         <article class="source-item"><h3>Jeu de données structuré et réponses pédagogiques</h3><p>Les 258 intitulés sont issus de la liste ministérielle. Les réponses proposées par leqcmcivique.fr sont indépendantes et diffusées sous Licence Ouverte 2.0.</p><a href="${sourceUrls.officialData}" target="_blank" rel="noopener">Consulter sur data.gouv.fr ↗</a></article>
+        <article class="source-item"><h3>Glossaire des notions civiques</h3><p>Les 81 définitions, références juridiques et relations entre notions sont produites par examenciviquenaturalisation.fr, une initiative privée, et diffusées sous Licence Ouverte 2.0.</p><a href="${sourceUrls.glossaryData}" target="_blank" rel="noopener">Consulter le jeu de données sur data.gouv.fr ↗</a></article>
         <article class="source-item"><h3>Ressources d’approfondissement</h3><p>Un lien Wikipédia est proposé uniquement lorsqu’un article précis a été associé à la notion. Les recherches automatiques trop larges ont été supprimées. Cette ressource encyclopédique complète la révision, mais ne remplace jamais les textes officiels.</p><a href="https://fr.wikipedia.org" target="_blank" rel="noopener">Consulter Wikipédia ↗</a></article>
       </div>
       <div class="notice notice-warning"><strong>Important</strong>Cap Citoyen est un outil indépendant et non officiel. Les mises en situation proposées sont des créations pédagogiques : les questions officielles de mise en situation ne sont pas rendues publiques.</div>
     `, true);
+  }
+
+  function renderGlossary(params) {
+    layout(`
+      <h1>Glossaire des notions civiques</h1>
+      <p class="lead">Chargement des définitions…</p>
+      <div class="glossary-loading" role="status">Préparation du glossaire</div>
+    `);
+
+    loadGlossaryData()
+      .then(data => {
+        if (parseRoute().path !== "glossaire") return;
+        renderGlossaryContent(data, params.get("notion"));
+      })
+      .catch(() => {
+        if (parseRoute().path !== "glossaire") return;
+        layout(`
+          <h1>Glossaire des notions civiques</h1>
+          <div class="notice notice-warning"><strong>Le glossaire n’a pas pu être chargé</strong>Vérifiez votre connexion puis rechargez cette page. S’il a déjà été ouvert, il reste normalement disponible hors connexion.</div>
+          <button class="button" id="retry-glossary" type="button">Réessayer</button>
+        `, true);
+        document.querySelector("#retry-glossary").addEventListener("click", () => renderGlossary(params));
+      });
+  }
+
+  function renderGlossaryContent(data, requestedSlug = null) {
+    const themeLabels = Object.fromEntries(data.metadata.thematiques.map(theme => [theme.id, theme.libelle]));
+    const entriesBySlug = new Map(data.entrees.map(entry => [entry.slug, entry]));
+    const themeOptions = data.metadata.thematiques
+      .map(theme => `<option value="${escapeHtml(theme.id)}">${escapeHtml(theme.libelle)}</option>`)
+      .join("");
+
+    layout(`
+      <h1>Glossaire des notions civiques</h1>
+      <p class="lead">Retrouvez 81 notions du programme, leur définition, leur référence juridique et les concepts associés.</p>
+      <div class="notice"><strong>Origine des définitions</strong>Ce glossaire est produit par <a href="${escapeHtml(data.metadata.url_producteur)}" target="_blank" rel="noopener">examenciviquenaturalisation.fr <span aria-hidden="true">↗</span></a>, une initiative privée, et publié sous Licence Ouverte 2.0 sur <a href="${sourceUrls.glossaryData}" target="_blank" rel="noopener">data.gouv.fr <span aria-hidden="true">↗</span></a>. Il complète les sources officielles sans s’y substituer.</div>
+      <div class="glossary-toolbar" role="search" aria-label="Rechercher dans le glossaire">
+        <div class="field field-grow">
+          <label for="glossary-search">Rechercher une notion</label>
+          <input id="glossary-search" type="search" placeholder="Ex. laïcité, Parlement, Sécurité sociale" autocomplete="off" aria-controls="glossary-list">
+        </div>
+        <div class="field">
+          <label for="glossary-theme">Thème</label>
+          <select id="glossary-theme" aria-controls="glossary-list"><option value="all">Tous les thèmes</option>${themeOptions}</select>
+        </div>
+      </div>
+      <p class="glossary-count" id="glossary-count" role="status" aria-live="polite"></p>
+      <div class="glossary-list" id="glossary-list"></div>
+      <p class="source-note">Version ${escapeHtml(data.metadata.version)} · Mise à jour du ${new Intl.DateTimeFormat("fr-FR", { dateStyle: "long" }).format(new Date(`${data.metadata.date_mise_a_jour}T12:00:00`))}.</p>
+    `);
+
+    const search = document.querySelector("#glossary-search");
+    const theme = document.querySelector("#glossary-theme");
+    const count = document.querySelector("#glossary-count");
+    const list = document.querySelector("#glossary-list");
+
+    const renderEntries = () => {
+      const query = normalizeSearch(search.value.trim());
+      const selectedTheme = theme.value;
+      const filtered = data.entrees.filter(entry => {
+        const matchesTheme = selectedTheme === "all" || entry.thematique === selectedTheme;
+        const searchable = normalizeSearch(`${entry.terme} ${entry.definition} ${entry.reference || ""}`);
+        return matchesTheme && (!query || searchable.includes(query));
+      });
+
+      count.textContent = `${filtered.length} notion${filtered.length > 1 ? "s" : ""} affichée${filtered.length > 1 ? "s" : ""} sur ${data.entrees.length}`;
+      if (!filtered.length) {
+        list.innerHTML = '<div class="empty"><h2>Aucune notion trouvée</h2><p>Essayez un autre mot ou affichez tous les thèmes.</p><button class="button button-secondary" id="reset-glossary" type="button">Réinitialiser la recherche</button></div>';
+        document.querySelector("#reset-glossary").addEventListener("click", () => {
+          search.value = "";
+          theme.value = "all";
+          renderEntries();
+          search.focus();
+        });
+        return;
+      }
+
+      list.innerHTML = filtered.map(entry => {
+        const related = entry.termes_lies
+          .map(slug => entriesBySlug.get(slug))
+          .filter(Boolean)
+          .map(item => `<a href="#/glossaire?notion=${encodeURIComponent(item.slug)}">${escapeHtml(item.terme)}</a>`)
+          .join("");
+        return `<details class="glossary-entry" id="notion-${escapeHtml(entry.slug)}">
+          <summary><span class="glossary-term">${escapeHtml(entry.terme)}</span><span class="tag">${escapeHtml(themeLabels[entry.thematique] || entry.thematique)}</span></summary>
+          <div class="glossary-content">
+            <p>${escapeHtml(entry.definition)}</p>
+            ${entry.reference ? `<p class="glossary-reference"><strong>Référence :</strong> ${escapeHtml(entry.reference)}</p>` : '<p class="glossary-reference"><strong>Référence :</strong> aucune référence juridique indiquée dans le jeu de données.</p>'}
+            ${related ? `<div class="glossary-related"><strong>Notions associées</strong><div>${related}</div></div>` : ""}
+          </div>
+        </details>`;
+      }).join("");
+    };
+
+    search.addEventListener("input", renderEntries);
+    theme.addEventListener("change", renderEntries);
+    renderEntries();
+
+    if (requestedSlug && entriesBySlug.has(requestedSlug)) {
+      window.requestAnimationFrame(() => {
+        const target = document.querySelector(`#notion-${CSS.escape(requestedSlug)}`);
+        if (!target) return;
+        target.open = true;
+        target.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+        target.querySelector("summary")?.focus({ preventScroll: true });
+      });
+    }
   }
 
   function renderPrivacy() {
@@ -1739,7 +1987,7 @@
 
         <section class="privacy-section">
           <h2>Mode hors connexion</h2>
-          <p>L’application conserve dans un cache technique les fichiers publics nécessaires à son fonctionnement : pages, styles, scripts, icônes et banque de questions. Ce cache ne contient pas votre identité ni votre progression.</p>
+          <p>L’application conserve dans un cache technique les fichiers publics nécessaires à son fonctionnement : pages, styles, scripts, icônes, banque de questions et glossaire. Ce cache ne contient pas votre identité ni votre progression.</p>
           <p>Il permet d’ouvrir les flashcards et les examens blancs sans connexion. Le navigateur le remplace lorsqu’une nouvelle version de l’application est disponible.</p>
         </section>
 
@@ -1781,16 +2029,23 @@
     layout('<div class="empty"><p class="eyebrow">Erreur 404</p><h1>Cette page n’existe pas</h1><a class="button" href="#/">Retour à l’accueil</a></div>', true);
   }
 
-  function router() {
+  async function router() {
     clearInterval(timerId);
     stopSpeech();
     const { path, params } = parseRoute();
+    const routeHash = location.hash;
+    if (["reviser", "entrainement", "resultats"].includes(path) && !glossaryData) {
+      layout('<div class="glossary-loading" role="status">Préparation des ressources pédagogiques…</div>', true);
+      try { await loadGlossaryData(); } catch (_) { /* Le parcours reste utilisable sans le complément. */ }
+      if (location.hash !== routeHash) return;
+    }
     setActiveNav(path);
     if (path === "home") renderHome();
     else if (path === "reviser") renderRevise(params);
     else if (path === "entrainement") renderPractice();
     else if (path === "examen") renderExamLanding();
     else if (path === "resultats") renderResults();
+    else if (path === "glossaire") renderGlossary(params);
     else if (path === "sources") renderSources();
     else if (path === "confidentialite") renderPrivacy();
     else renderNotFound();
