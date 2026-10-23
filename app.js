@@ -1130,7 +1130,7 @@
       : "";
     const sourceLabel = q.answers ? "Source de la question et attribution" : "Source officielle";
     const attribution = q.answers ? `<p class="source-note">Réponse pédagogique indépendante proposée par leqcmcivique.fr ; l’administration ne publie pas de corrigé officiel.${external ? " La ressource Wikipédia apporte uniquement un contexte complémentaire." : ""}</p>` : "";
-    return `<div class="short-answer"><span>Réponse à retenir</span><strong>${answer}</strong></div>${acceptedAnswers}<section class="explanation-box" aria-live="polite"><div class="explanation-heading"><h3>${showEnglish ? "To understand" : "Pour comprendre"}</h3><button class="translation-button" id="toggle-translation" type="button" lang="${showEnglish ? "en" : "fr"}">${showEnglish ? "Lire en français" : "Read in English"}</button></div><p class="explanation-main" lang="${showEnglish ? "en" : "fr"}">${showEnglish ? why.en : why.fr}</p>${context}<aside class="trap-box" lang="${showEnglish ? "en" : "fr"}"><strong>${showEnglish ? "Common trap" : "Piège fréquent"}</strong><p>${showEnglish ? trap.en : trap.fr}</p></aside></section><div class="answer-sources"><a href="${sourceUrls[q.source]}" target="_blank" rel="noopener">${sourceLabel} <span aria-hidden="true">↗</span></a>${externalLink}</div>${attribution}`;
+    return `<div class="short-answer"><span>Réponse à retenir</span><strong>${answer}</strong></div>${acceptedAnswers}<section class="explanation-box"><div class="explanation-heading"><h3>${showEnglish ? "To understand" : "Pour comprendre"}</h3><button class="translation-button" id="toggle-translation" type="button" lang="${showEnglish ? "en" : "fr"}">${showEnglish ? "Lire en français" : "Read in English"}</button></div><p class="explanation-main" lang="${showEnglish ? "en" : "fr"}">${showEnglish ? why.en : why.fr}</p>${context}<aside class="trap-box" lang="${showEnglish ? "en" : "fr"}"><strong>${showEnglish ? "Common trap" : "Piège fréquent"}</strong><p>${showEnglish ? trap.en : trap.fr}</p></aside></section><div class="answer-sources"><a href="${sourceUrls[q.source]}" target="_blank" rel="noopener">${sourceLabel} <span aria-hidden="true">↗</span></a>${externalLink}</div>${attribution}`;
   }
 
   function practiceFeedback(q, selected, isReworded) {
@@ -1266,6 +1266,16 @@
     window.scrollTo({ top: scrollToTop ? 0 : scrollTop, behavior: "instant" });
   }
 
+  function focusRendered(selector) {
+    if (!selector) return;
+    window.requestAnimationFrame(() => {
+      const target = document.querySelector(selector);
+      if (!target) return;
+      if (!target.matches("a, button, input, select, textarea, [tabindex]")) target.setAttribute("tabindex", "-1");
+      target.focus({ preventScroll: true });
+    });
+  }
+
   function renderHome() {
     const known = progress.known.length;
     const seen = progress.seen.length;
@@ -1282,7 +1292,7 @@
         <h3>${theme.name}</h3>
         <p>${officialCount} questions officielles${situationCount ? ` + ${situationCount} situations d’entraînement` : ""}</p>
         <p>${mastered} carte${mastered > 1 ? "s" : ""} maîtrisée${mastered > 1 ? "s" : ""} sur ${pool.length}</p>
-        <div class="progress" aria-label="${percent(mastered, pool.length)} % maîtrisé"><span style="width:${percent(mastered, pool.length)}%"></span></div>
+        <div class="progress" aria-label="${percent(mastered, pool.length)} % maîtrisé"><span style="--progress:${percent(mastered, pool.length) / 100}"></span></div>
       </a>`;
     }).join("");
 
@@ -1374,23 +1384,25 @@
       return [id, useAlternate ? alternate : q.q];
     }));
     flashSession = { ids, wordings, translations: {}, index: 0, revealed: false };
-    renderFlashcard();
+    renderFlashcard(scrollToCards ? "#flash-question" : null);
     if (scrollToCards && window.matchMedia("(max-width: 800px)").matches) {
       const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
       window.requestAnimationFrame(() => document.querySelector("#flash-zone")?.scrollIntoView({ behavior, block: "start" }));
     }
   }
 
-  function renderFlashcard() {
+  function renderFlashcard(focusTarget = null) {
     stopSpeech();
     const zone = document.querySelector("#flash-zone");
     if (!flashSession.ids.length) {
       zone.innerHTML = `<div class="empty"><h2>Aucune carte ici</h2><p>Essayez un autre filtre ou un autre thème.</p></div>`;
+      focusRendered(focusTarget || ".empty h2");
       return;
     }
     if (flashSession.index >= flashSession.ids.length) {
       zone.innerHTML = `<div class="result-hero" style="--result-color:var(--green)"><p class="eyebrow">Session terminée</p><h2>Révision enregistrée</h2><p>Les prochaines cartes seront proposées selon vos réponses et leur date de révision.</p><button class="button" id="restart-flash" type="button">Nouvelle session</button></div>`;
       document.querySelector("#restart-flash").addEventListener("click", () => startFlashcards(true));
+      focusRendered(focusTarget || ".result-hero h2");
       return;
     }
     const q = getQuestion(flashSession.ids[flashSession.index]);
@@ -1398,12 +1410,12 @@
     const isReworded = displayedQuestion !== q.q;
     zone.innerHTML = `<div class="study-shell">
       <div class="study-meta"><span>Carte ${flashSession.index + 1} sur ${flashSession.ids.length}</span><span>${cardStatus(q.id)}</span></div>
-      <div class="progress"><span style="width:${percent(flashSession.index + 1, flashSession.ids.length)}%"></span></div>
+      <div class="progress"><span style="--progress:${percent(flashSession.index + 1, flashSession.ids.length) / 100}"></span></div>
       <article class="flashcard" aria-labelledby="flash-question">
         <div class="flash-tags">${tag(q)} ${isReworded ? '<span class="tag tag-reworded">Formulation d’entraînement</span>' : ""}</div>
         ${speechButton()}
         <h2 id="flash-question">${displayedQuestion}</h2>
-        ${flashSession.revealed ? `<div class="answer">${isReworded ? `<p class="official-wording"><strong>Formulation officielle :</strong> ${q.q}</p>` : ""}${flashAnswer(q, !!flashSession.translations[q.id])}</div>` : '<button class="button button-secondary reveal-button" id="flip-card" type="button" aria-expanded="false">Afficher la réponse</button>'}
+        ${flashSession.revealed ? `<div class="answer" aria-label="Réponse affichée">${isReworded ? `<p class="official-wording"><strong>Formulation officielle :</strong> ${q.q}</p>` : ""}${flashAnswer(q, !!flashSession.translations[q.id])}</div>` : '<button class="button button-secondary reveal-button" id="flip-card" type="button" aria-expanded="false">Afficher la réponse</button>'}
       </article>
       ${flashSession.revealed ? `<fieldset class="rating-panel"><legend>Comment évaluez-vous votre réponse&nbsp;?</legend><div class="rating-grid">
         <button class="rating-button rating-again" data-rating="again" type="button"><strong>Je ne savais pas</strong><small>${intervalLabel(q.id, "again")}</small></button>
@@ -1417,11 +1429,12 @@
       </div>
     </div>`;
     bindSpeechButton(displayedQuestion);
-    document.querySelector("#flip-card")?.addEventListener("click", () => { flashSession.revealed = true; uniquePush(progress.seen, q.id); saveProgress(); renderFlashcard(); });
-    document.querySelector("#toggle-translation")?.addEventListener("click", () => { flashSession.translations[q.id] = !flashSession.translations[q.id]; renderFlashcard(); });
-    document.querySelector("#prev-card").addEventListener("click", () => { flashSession.index--; flashSession.revealed = false; renderFlashcard(); });
-    document.querySelector("#next-card").addEventListener("click", () => { flashSession.index++; flashSession.revealed = false; renderFlashcard(); });
+    document.querySelector("#flip-card")?.addEventListener("click", () => { flashSession.revealed = true; uniquePush(progress.seen, q.id); saveProgress(); renderFlashcard(".answer"); });
+    document.querySelector("#toggle-translation")?.addEventListener("click", () => { flashSession.translations[q.id] = !flashSession.translations[q.id]; renderFlashcard("#toggle-translation"); });
+    document.querySelector("#prev-card").addEventListener("click", () => { flashSession.index--; flashSession.revealed = false; renderFlashcard("#flash-question"); });
+    document.querySelector("#next-card").addEventListener("click", () => { flashSession.index++; flashSession.revealed = false; renderFlashcard("#flash-question"); });
     document.querySelectorAll("[data-rating]").forEach(button => button.addEventListener("click", () => rateCard(q.id, button.dataset.rating)));
+    focusRendered(focusTarget);
   }
 
   function rateCard(id, rating) {
@@ -1456,7 +1469,7 @@
     toast(messages[rating]);
     flashSession.index++;
     flashSession.revealed = false;
-    renderFlashcard();
+    renderFlashcard("#flash-question");
   }
 
   function renderPractice() {
@@ -1485,10 +1498,10 @@
       return [id, alternate !== q.q && Math.random() < .5 ? alternate : q.q];
     }));
     practiceSession = { ids, wordings, index: 0, answers: [], score: 0, revealed: false };
-    renderPracticeQuestion();
+    renderPracticeQuestion(false, ".question-card h2");
   }
 
-  function renderPracticeQuestion(preserveScroll = false) {
+  function renderPracticeQuestion(preserveScroll = false, focusTarget = null) {
     stopSpeech();
     const scrollTop = window.scrollY;
     const zone = document.querySelector("#practice-zone");
@@ -1499,6 +1512,7 @@
         <button class="button" id="restart-practice" type="button">Nouvelle série</button>
       </div>`;
       document.querySelector("#restart-practice").addEventListener("click", startPractice);
+      focusRendered(focusTarget || ".result-hero h2");
       return;
     }
     const q = getQuestion(practiceSession.ids[practiceSession.index]);
@@ -1507,7 +1521,7 @@
     const selected = practiceSession.answers[practiceSession.index];
     zone.innerHTML = `<div class="question-shell">
       <div class="question-topbar"><span>Question ${practiceSession.index + 1}/${practiceSession.ids.length}</span><strong>${practiceSession.score} bonne${practiceSession.score > 1 ? "s" : ""} réponse${practiceSession.score > 1 ? "s" : ""}</strong></div>
-      <div class="progress"><span style="width:${percent(practiceSession.index, practiceSession.ids.length)}%"></span></div>
+      <div class="progress"><span style="--progress:${percent(practiceSession.index, practiceSession.ids.length) / 100}"></span></div>
       <article class="question-card">
         <div>${tag(q)} ${isReworded ? '<span class="tag tag-reworded">Formulation d’entraînement</span>' : ""}</div>${speechButton()}<h2>${displayedQuestion}</h2>
         <div class="choices">${q.choices.map((choice, i) => `<button class="choice ${practiceSession.revealed ? (i === q.answer ? "correct" : i === selected ? "incorrect" : "") : ""}" data-choice="${i}" type="button" ${practiceSession.revealed ? "disabled" : ""}><span class="choice-letter">${LETTERS[i]}</span><span>${choice}</span></button>`).join("")}</div>
@@ -1517,8 +1531,9 @@
     </div>`;
     bindSpeechButton(displayedQuestion);
     document.querySelectorAll("[data-choice]").forEach(btn => btn.addEventListener("click", () => answerPractice(Number(btn.dataset.choice))));
-    document.querySelector("#practice-next")?.addEventListener("click", () => { practiceSession.index++; practiceSession.revealed = false; renderPracticeQuestion(); });
+    document.querySelector("#practice-next")?.addEventListener("click", () => { practiceSession.index++; practiceSession.revealed = false; renderPracticeQuestion(false, ".question-card h2"); });
     if (preserveScroll) window.scrollTo({ top: scrollTop, behavior: "instant" });
+    focusRendered(focusTarget);
   }
 
   function answerPractice(choice) {
@@ -1531,7 +1546,7 @@
     uniquePush(progress.seen, q.id);
     if (choice !== q.answer) uniquePush(progress.review, q.id);
     saveProgress();
-    renderPracticeQuestion(true);
+    renderPracticeQuestion(true, ".feedback");
   }
 
   function createExam(mode = "mixed") {
@@ -1580,9 +1595,9 @@
       <p class="lead">Un tirage de 40 questions, 45 minutes et une seule bonne réponse par question.</p>
       ${active ? '<div class="notice"><strong>Une session est en cours</strong>Vous pouvez reprendre exactement là où vous vous êtes arrêté.</div>' : ""}
       <div class="grid">
-        <div class="card"><span class="card-icon">40</span><h3>40 questions</h3><p>Selon la répartition officielle entre les cinq thèmes.</p></div>
-        <div class="card"><span class="card-icon">45</span><h3>45 minutes</h3><p>Le chronomètre continue si vous rechargez la page.</p></div>
-        <div class="card"><span class="card-icon">80</span><h3>80 % requis</h3><p>Il faut obtenir au moins 32 réponses correctes.</p></div>
+        <div class="card"><span class="card-icon">40</span><h2 class="card-title">40 questions</h2><p>Selon la répartition officielle entre les cinq thèmes.</p></div>
+        <div class="card"><span class="card-icon">45</span><h2 class="card-title">45 minutes</h2><p>Le chronomètre continue si vous rechargez la page.</p></div>
+        <div class="card"><span class="card-icon">80</span><h2 class="card-title">80 % requis</h2><p>Il faut obtenir au moins 32 réponses correctes.</p></div>
       </div>
       <div class="toolbar">
         <div class="field field-grow"><label for="exam-mode">Contenu de l’examen</label><select id="exam-mode"><option value="mixed">Mixte : connaissances + situations</option><option value="official">Connaissances officielles uniquement</option></select></div>
@@ -1595,15 +1610,15 @@
     const modeSelect = document.querySelector("#exam-mode");
     modeSelect.value = active?.mode || "mixed";
     modeSelect.addEventListener("change", () => { document.querySelector("#exam-mode-note").innerHTML = examModeNote(modeSelect.value); });
-    document.querySelector("#resume-exam")?.addEventListener("click", renderExamSession);
+    document.querySelector("#resume-exam")?.addEventListener("click", () => renderExamSession(false, ".question-card h2"));
     document.querySelector("#new-exam")?.addEventListener("click", () => {
       if (active && !confirm("Recommencer supprimera la session actuelle. Continuer ?")) return;
       saveExam(createExam(modeSelect.value));
-      renderExamSession();
+      renderExamSession(false, ".question-card h2");
     });
   }
 
-  function renderExamSession(preserveScroll = false) {
+  function renderExamSession(preserveScroll = false, focusTarget = null) {
     stopSpeech();
     let exam = loadExam();
     if (!exam) { renderExamLanding(); return; }
@@ -1615,11 +1630,11 @@
     const officialMode = (exam.mode || "mixed") === "official";
     layout(`<div class="question-shell">
       <div class="question-topbar"><div><strong>Examen blanc</strong><br><span>Question ${exam.index + 1} sur 40</span></div><span class="timer" id="exam-timer" role="timer">45:00</span></div>
-      <div class="progress"><span style="width:${percent(Object.keys(exam.answers).length, 40)}%"></span></div>
-      <div class="exam-map" aria-label="Navigation entre les questions">${exam.ids.map((id, i) => `<button type="button" data-exam-index="${i}" class="${i === exam.index ? "current" : ""} ${exam.answers[id] !== undefined ? "answered" : ""} ${exam.flagged.includes(id) ? "flagged" : ""}" aria-label="Question ${i + 1}${exam.answers[id] !== undefined ? ", répondue" : ""}">${i + 1}</button>`).join("")}</div>
+      <div class="progress"><span style="--progress:${percent(Object.keys(exam.answers).length, 40) / 100}"></span></div>
+      <div class="exam-map" aria-label="Navigation entre les questions">${exam.ids.map((id, i) => `<button type="button" data-exam-index="${i}" class="${i === exam.index ? "current" : ""} ${exam.answers[id] !== undefined ? "answered" : ""} ${exam.flagged.includes(id) ? "flagged" : ""}" aria-label="Question ${i + 1}${exam.answers[id] !== undefined ? ", répondue" : ""}" ${i === exam.index ? 'aria-current="step"' : ""}>${i + 1}</button>`).join("")}</div>
       <article class="question-card">
         <div>${tag(q)} ${officialMode ? '<span class="tag tag-official">Connaissance officielle · QCM adapté</span>' : ""} ${isReworded ? '<span class="tag tag-reworded">Formulation d’entraînement</span>' : ""}</div>${speechButton()}<h2>${displayedQuestion}</h2>
-        <div class="choices">${q.choices.map((choice, i) => `<button class="choice ${selected === i ? "selected" : ""}" data-exam-choice="${i}" type="button"><span class="choice-letter">${LETTERS[i]}</span><span>${choice}</span></button>`).join("")}</div>
+        <div class="choices">${q.choices.map((choice, i) => `<button class="choice ${selected === i ? "selected" : ""}" data-exam-choice="${i}" type="button" aria-pressed="${selected === i}"><span class="choice-letter">${LETTERS[i]}</span><span>${choice}</span></button>`).join("")}</div>
         <button class="flag-button" id="flag-question" type="button">${exam.flagged.includes(q.id) ? "Retirer le repère" : "Marquer pour y revenir"}</button>
         <div class="question-nav">
           <button class="button button-ghost" id="exam-prev" type="button" ${exam.index === 0 ? "disabled" : ""}>← Précédente</button>
@@ -1630,18 +1645,20 @@
     startTimer();
     bindSpeechButton(displayedQuestion);
     document.querySelectorAll("[data-exam-choice]").forEach(btn => btn.addEventListener("click", () => {
-      exam = loadExam(); exam.answers[q.id] = Number(btn.dataset.examChoice); saveExam(exam); renderExamSession(true);
+      const choice = Number(btn.dataset.examChoice);
+      exam = loadExam(); exam.answers[q.id] = choice; saveExam(exam); renderExamSession(true, `[data-exam-choice="${choice}"]`);
     }));
-    document.querySelectorAll("[data-exam-index]").forEach(btn => btn.addEventListener("click", () => { exam = loadExam(); exam.index = Number(btn.dataset.examIndex); saveExam(exam); renderExamSession(); }));
-    document.querySelector("#exam-prev").addEventListener("click", () => { exam = loadExam(); exam.index--; saveExam(exam); renderExamSession(); });
-    document.querySelector("#exam-next")?.addEventListener("click", () => { exam = loadExam(); exam.index++; saveExam(exam); renderExamSession(); });
+    document.querySelectorAll("[data-exam-index]").forEach(btn => btn.addEventListener("click", () => { exam = loadExam(); exam.index = Number(btn.dataset.examIndex); saveExam(exam); renderExamSession(false, ".question-card h2"); }));
+    document.querySelector("#exam-prev").addEventListener("click", () => { exam = loadExam(); exam.index--; saveExam(exam); renderExamSession(false, ".question-card h2"); });
+    document.querySelector("#exam-next")?.addEventListener("click", () => { exam = loadExam(); exam.index++; saveExam(exam); renderExamSession(false, ".question-card h2"); });
     document.querySelector("#flag-question").addEventListener("click", () => {
-      exam = loadExam(); exam.flagged.includes(q.id) ? removeFrom(exam.flagged, q.id) : uniquePush(exam.flagged, q.id); saveExam(exam); renderExamSession(true);
+      exam = loadExam(); exam.flagged.includes(q.id) ? removeFrom(exam.flagged, q.id) : uniquePush(exam.flagged, q.id); saveExam(exam); renderExamSession(true, "#flag-question");
     });
     document.querySelector("#finish-exam")?.addEventListener("click", () => {
       const unanswered = 40 - Object.keys(loadExam().answers).length;
       if (!unanswered || confirm(`Il reste ${unanswered} question${unanswered > 1 ? "s" : ""} sans réponse. Terminer quand même ?`)) finishExam(false);
     });
+    focusRendered(focusTarget);
   }
 
   function startTimer() {
@@ -1688,7 +1705,7 @@
     const breakdown = Object.entries(themes).map(([id, theme]) => {
       const ids = result.ids.filter(qid => getQuestion(qid).theme === id);
       const correct = ids.filter(qid => result.answers[qid] === getQuestion(qid).answer).length;
-      return `<div class="breakdown-row"><span>${theme.short}</span><div class="progress" style="--theme-color:${theme.color}"><span style="width:${percent(correct, ids.length)}%"></span></div><strong>${correct}/${ids.length}</strong></div>`;
+      return `<div class="breakdown-row"><span>${theme.short}</span><div class="progress" style="--theme-color:${theme.color}"><span style="--progress:${percent(correct, ids.length) / 100}"></span></div><strong>${correct}/${ids.length}</strong></div>`;
     }).join("");
     const review = result.ids.map((id, index) => {
       const q = getQuestion(id); const choice = result.answers[id]; const good = choice === q.answer;
