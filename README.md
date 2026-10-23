@@ -16,11 +16,18 @@ Application statique de révision de l’examen civique pour la naturalisation f
 - répartition conforme à l’arrêté du 10 octobre 2025
 - progression conservée dans `localStorage`
 - thème clair et sombre
+- application web installable (PWA) avec fonctionnement hors connexion
+- bouton d’installation directe sur les navigateurs compatibles et aide dédiée sur iPhone/iPad
+- notification lorsqu’une nouvelle version est disponible
 - interface responsive et utilisable au clavier
 
 ## Prévisualisation locale
 
 Le projet n’a aucune dépendance. Ouvrir `index.html` directement ou servir ce dossier avec un serveur statique.
+
+Les fonctions PWA (installation et mode hors connexion) nécessitent un serveur HTTP local ou un hébergement HTTPS. Elles ne sont pas actives en ouvrant directement le fichier avec `file://`.
+
+Lorsqu’un fichier essentiel est modifié, incrémenter le numéro de `CACHE_NAME` dans `service-worker.js` afin que l’application propose la nouvelle version aux utilisateurs déjà installés.
 
 
 ## Mise à jour éditoriale

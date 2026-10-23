@@ -1,0 +1,49 @@
+{
+  "id": "./",
+  "name": "Cap Citoyen — Examen civique",
+  "short_name": "Cap Citoyen",
+  "description": "Flashcards, entraînements et examens blancs pour préparer l’examen civique de naturalisation française.",
+  "lang": "fr-FR",
+  "dir": "ltr",
+  "start_url": "./#/",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#ffffff",
+  "theme_color": "#000091",
+  "categories": ["education"],
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Réviser les flashcards",
+      "short_name": "Réviser",
+      "url": "./#/reviser",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Lancer un examen blanc",
+      "short_name": "Examen blanc",
+      "url": "./#/examen",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
+  ]
+}
