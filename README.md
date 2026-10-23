@@ -22,17 +22,6 @@ Application statique de révision de l’examen civique pour la naturalisation f
 
 Le projet n’a aucune dépendance. Ouvrir `index.html` directement ou servir ce dossier avec un serveur statique.
 
-## GitHub Pages
-
-1. Publier le contenu de ce dossier dans un dépôt GitHub.
-2. Dans **Settings > Pages**, sélectionner **Deploy from a branch**.
-3. Choisir la branche et le dossier racine.
-
-Les chemins sont relatifs et le fichier `.nojekyll` est déjà présent.
-
-## Netlify
-
-Glisser ce dossier dans Netlify Drop ou le connecter à un dépôt. Le fichier `netlify.toml` configure le dossier courant comme répertoire de publication.
 
 ## Mise à jour éditoriale
 
