@@ -1,4 +1,4 @@
-const CACHE_NAME = "cap-citoyen-v9";
+const CACHE_NAME = "cap-citoyen-v10";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -8,10 +8,10 @@ const APP_SHELL = [
   "./app.js",
   "./pwa.js",
   "./manifest.webmanifest",
-  "./icons/icon-192-v2.png",
-  "./icons/icon-512-v2.png",
-  "./icons/icon-maskable-512-v2.png",
-  "./icons/apple-touch-icon-v2.png"
+  "./icons/icon-192-v3.png",
+  "./icons/icon-512-v3.png",
+  "./icons/icon-maskable-512-v3.png",
+  "./icons/apple-touch-icon-v3.png"
 ];
 
 self.addEventListener("install", event => {
