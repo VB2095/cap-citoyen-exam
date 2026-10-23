@@ -14,13 +14,15 @@
   let flashSession = null;
   let practiceSession = null;
   let activeUtterance = null;
+  let glossaryDataPromise = null;
 
   const sourceUrls = {
     livret: "https://www.legifrance.gouv.fr/download/pdf?id=isr0azgWEe4wSbu_Z-hm_3tIAj0JcaOEDqWIfclQeWk=",
     questions: "https://www.immigration.interieur.gouv.fr/documentation/guides-textes-et-brochures/questions-de-connaissance-pour-lexamen-civique-nationalite-francaise.html",
     arrete: "https://www.legifrance.gouv.fr/loda/id/LEGISCTA000052382278",
-    procedure: "https://www.immigration.interieur.gouv.fr/devenir-francais/procedures-dacces-a-nationalite-francaise"
-    ,officialData: "https://www.data.gouv.fr/datasets/examen-civique-naturalisation-questions-de-connaissances-officielles-et-propositions-de-reponses"
+    procedure: "https://www.immigration.interieur.gouv.fr/devenir-francais/procedures-dacces-a-nationalite-francaise",
+    officialData: "https://www.data.gouv.fr/datasets/examen-civique-naturalisation-questions-de-connaissances-officielles-et-propositions-de-reponses",
+    glossaryData: "https://www.data.gouv.fr/datasets/glossaire-de-lexamen-civique-notions-cles-pour-la-naturalisation-et-les-titres-de-sejour"
   };
 
   const contextNotes = [
@@ -1276,6 +1278,39 @@
     });
   }
 
+  function escapeHtml(value) {
+    return String(value ?? "").replace(/[&<>'"]/g, character => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      "'": "&#39;",
+      '"': "&quot;"
+    })[character]);
+  }
+
+  function normalizeSearch(value) {
+    return String(value ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("fr");
+  }
+
+  function loadGlossaryData() {
+    if (!glossaryDataPromise) {
+      glossaryDataPromise = fetch("./data/glossaire-notions-civiques.json")
+        .then(response => {
+          if (!response.ok) throw new Error(`glossary-${response.status}`);
+          return response.json();
+        })
+        .then(data => {
+          if (!Array.isArray(data.entrees) || !data.metadata) throw new Error("glossary-invalid");
+          return data;
+        })
+        .catch(error => {
+          glossaryDataPromise = null;
+          throw error;
+        });
+    }
+    return glossaryDataPromise;
+  }
+
   function renderHome() {
     const known = progress.known.length;
     const seen = progress.seen.length;
@@ -1336,7 +1371,7 @@
       </section>
 
       <section class="section">
-        <div class="notice"><strong>Couverture intégrale</strong>Les 258 questions de connaissance publiées pour la naturalisation sont intégrées aux flashcards. Les réponses sont pédagogiques : l’administration publie les questions, mais pas de corrigé officiel.</div>
+        <div class="notice"><strong>Couverture intégrale</strong>Les 258 questions de connaissance publiées pour la naturalisation sont intégrées aux flashcards. Les réponses sont pédagogiques : l’administration publie les questions, mais pas de corrigé officiel. <a href="#/glossaire">Consulter également le glossaire des 81 notions civiques</a>.</div>
         <div class="notice notice-warning"><strong>Bon à savoir</strong>Les questions officielles de mise en situation ne sont pas publiques. Celles proposées ici sont des exercices originaux signalés comme tels.</div>
       </section>
     `);
@@ -1735,10 +1770,118 @@
         <article class="source-item"><h3>${sources.questions}</h3><p>Intitulés publics des questions de connaissance classés par thème.</p><a href="${sourceUrls.questions}" target="_blank" rel="noopener">Consulter sur le site du ministère ↗</a></article>
         <article class="source-item"><h3>${sources.procedure}</h3><p>Informations pratiques concernant l’examen et l’accès à la nationalité française.</p><a href="${sourceUrls.procedure}" target="_blank" rel="noopener">Consulter sur le site du ministère ↗</a></article>
         <article class="source-item"><h3>Jeu de données structuré et réponses pédagogiques</h3><p>Les 258 intitulés sont issus de la liste ministérielle. Les réponses proposées par leqcmcivique.fr sont indépendantes et diffusées sous Licence Ouverte 2.0.</p><a href="${sourceUrls.officialData}" target="_blank" rel="noopener">Consulter sur data.gouv.fr ↗</a></article>
+        <article class="source-item"><h3>Glossaire des notions civiques</h3><p>Les 81 définitions, références juridiques et relations entre notions sont produites par examenciviquenaturalisation.fr, une initiative privée, et diffusées sous Licence Ouverte 2.0.</p><a href="${sourceUrls.glossaryData}" target="_blank" rel="noopener">Consulter le jeu de données sur data.gouv.fr ↗</a></article>
         <article class="source-item"><h3>Ressources d’approfondissement</h3><p>Un lien Wikipédia est proposé uniquement lorsqu’un article précis a été associé à la notion. Les recherches automatiques trop larges ont été supprimées. Cette ressource encyclopédique complète la révision, mais ne remplace jamais les textes officiels.</p><a href="https://fr.wikipedia.org" target="_blank" rel="noopener">Consulter Wikipédia ↗</a></article>
       </div>
       <div class="notice notice-warning"><strong>Important</strong>Cap Citoyen est un outil indépendant et non officiel. Les mises en situation proposées sont des créations pédagogiques : les questions officielles de mise en situation ne sont pas rendues publiques.</div>
     `, true);
+  }
+
+  function renderGlossary(params) {
+    layout(`
+      <h1>Glossaire des notions civiques</h1>
+      <p class="lead">Chargement des définitions…</p>
+      <div class="glossary-loading" role="status">Préparation du glossaire</div>
+    `);
+
+    loadGlossaryData()
+      .then(data => {
+        if (parseRoute().path !== "glossaire") return;
+        renderGlossaryContent(data, params.get("notion"));
+      })
+      .catch(() => {
+        if (parseRoute().path !== "glossaire") return;
+        layout(`
+          <h1>Glossaire des notions civiques</h1>
+          <div class="notice notice-warning"><strong>Le glossaire n’a pas pu être chargé</strong>Vérifiez votre connexion puis rechargez cette page. S’il a déjà été ouvert, il reste normalement disponible hors connexion.</div>
+          <button class="button" id="retry-glossary" type="button">Réessayer</button>
+        `, true);
+        document.querySelector("#retry-glossary").addEventListener("click", () => renderGlossary(params));
+      });
+  }
+
+  function renderGlossaryContent(data, requestedSlug = null) {
+    const themeLabels = Object.fromEntries(data.metadata.thematiques.map(theme => [theme.id, theme.libelle]));
+    const entriesBySlug = new Map(data.entrees.map(entry => [entry.slug, entry]));
+    const themeOptions = data.metadata.thematiques
+      .map(theme => `<option value="${escapeHtml(theme.id)}">${escapeHtml(theme.libelle)}</option>`)
+      .join("");
+
+    layout(`
+      <h1>Glossaire des notions civiques</h1>
+      <p class="lead">Retrouvez 81 notions du programme, leur définition, leur référence juridique et les concepts associés.</p>
+      <div class="notice"><strong>Origine des définitions</strong>Ce glossaire est produit par <a href="${escapeHtml(data.metadata.url_producteur)}" target="_blank" rel="noopener">examenciviquenaturalisation.fr <span aria-hidden="true">↗</span></a>, une initiative privée, et publié sous Licence Ouverte 2.0 sur <a href="${sourceUrls.glossaryData}" target="_blank" rel="noopener">data.gouv.fr <span aria-hidden="true">↗</span></a>. Il complète les sources officielles sans s’y substituer.</div>
+      <div class="glossary-toolbar" role="search" aria-label="Rechercher dans le glossaire">
+        <div class="field field-grow">
+          <label for="glossary-search">Rechercher une notion</label>
+          <input id="glossary-search" type="search" placeholder="Ex. laïcité, Parlement, Sécurité sociale" autocomplete="off" aria-controls="glossary-list">
+        </div>
+        <div class="field">
+          <label for="glossary-theme">Thème</label>
+          <select id="glossary-theme" aria-controls="glossary-list"><option value="all">Tous les thèmes</option>${themeOptions}</select>
+        </div>
+      </div>
+      <p class="glossary-count" id="glossary-count" role="status" aria-live="polite"></p>
+      <div class="glossary-list" id="glossary-list"></div>
+      <p class="source-note">Version ${escapeHtml(data.metadata.version)} · Mise à jour du ${new Intl.DateTimeFormat("fr-FR", { dateStyle: "long" }).format(new Date(`${data.metadata.date_mise_a_jour}T12:00:00`))}.</p>
+    `);
+
+    const search = document.querySelector("#glossary-search");
+    const theme = document.querySelector("#glossary-theme");
+    const count = document.querySelector("#glossary-count");
+    const list = document.querySelector("#glossary-list");
+
+    const renderEntries = () => {
+      const query = normalizeSearch(search.value.trim());
+      const selectedTheme = theme.value;
+      const filtered = data.entrees.filter(entry => {
+        const matchesTheme = selectedTheme === "all" || entry.thematique === selectedTheme;
+        const searchable = normalizeSearch(`${entry.terme} ${entry.definition} ${entry.reference || ""}`);
+        return matchesTheme && (!query || searchable.includes(query));
+      });
+
+      count.textContent = `${filtered.length} notion${filtered.length > 1 ? "s" : ""} affichée${filtered.length > 1 ? "s" : ""} sur ${data.entrees.length}`;
+      if (!filtered.length) {
+        list.innerHTML = '<div class="empty"><h2>Aucune notion trouvée</h2><p>Essayez un autre mot ou affichez tous les thèmes.</p><button class="button button-secondary" id="reset-glossary" type="button">Réinitialiser la recherche</button></div>';
+        document.querySelector("#reset-glossary").addEventListener("click", () => {
+          search.value = "";
+          theme.value = "all";
+          renderEntries();
+          search.focus();
+        });
+        return;
+      }
+
+      list.innerHTML = filtered.map(entry => {
+        const related = entry.termes_lies
+          .map(slug => entriesBySlug.get(slug))
+          .filter(Boolean)
+          .map(item => `<a href="#/glossaire?notion=${encodeURIComponent(item.slug)}">${escapeHtml(item.terme)}</a>`)
+          .join("");
+        return `<details class="glossary-entry" id="notion-${escapeHtml(entry.slug)}">
+          <summary><span class="glossary-term">${escapeHtml(entry.terme)}</span><span class="tag">${escapeHtml(themeLabels[entry.thematique] || entry.thematique)}</span></summary>
+          <div class="glossary-content">
+            <p>${escapeHtml(entry.definition)}</p>
+            ${entry.reference ? `<p class="glossary-reference"><strong>Référence :</strong> ${escapeHtml(entry.reference)}</p>` : '<p class="glossary-reference"><strong>Référence :</strong> aucune référence juridique indiquée dans le jeu de données.</p>'}
+            ${related ? `<div class="glossary-related"><strong>Notions associées</strong><div>${related}</div></div>` : ""}
+          </div>
+        </details>`;
+      }).join("");
+    };
+
+    search.addEventListener("input", renderEntries);
+    theme.addEventListener("change", renderEntries);
+    renderEntries();
+
+    if (requestedSlug && entriesBySlug.has(requestedSlug)) {
+      window.requestAnimationFrame(() => {
+        const target = document.querySelector(`#notion-${CSS.escape(requestedSlug)}`);
+        if (!target) return;
+        target.open = true;
+        target.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+        target.querySelector("summary")?.focus({ preventScroll: true });
+      });
+    }
   }
 
   function renderPrivacy() {
@@ -1756,7 +1899,7 @@
 
         <section class="privacy-section">
           <h2>Mode hors connexion</h2>
-          <p>L’application conserve dans un cache technique les fichiers publics nécessaires à son fonctionnement : pages, styles, scripts, icônes et banque de questions. Ce cache ne contient pas votre identité ni votre progression.</p>
+          <p>L’application conserve dans un cache technique les fichiers publics nécessaires à son fonctionnement : pages, styles, scripts, icônes, banque de questions et glossaire. Ce cache ne contient pas votre identité ni votre progression.</p>
           <p>Il permet d’ouvrir les flashcards et les examens blancs sans connexion. Le navigateur le remplace lorsqu’une nouvelle version de l’application est disponible.</p>
         </section>
 
@@ -1808,6 +1951,7 @@
     else if (path === "entrainement") renderPractice();
     else if (path === "examen") renderExamLanding();
     else if (path === "resultats") renderResults();
+    else if (path === "glossaire") renderGlossary(params);
     else if (path === "sources") renderSources();
     else if (path === "confidentialite") renderPrivacy();
     else renderNotFound();

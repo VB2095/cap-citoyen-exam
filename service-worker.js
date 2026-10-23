@@ -1,10 +1,11 @@
-const CACHE_NAME = "cap-citoyen-v14";
+const CACHE_NAME = "cap-citoyen-v16";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./styles.css",
   "./official-bank.js",
   "./questions.js",
+  "./data/glossaire-notions-civiques.json",
   "./app.js",
   "./pwa.js",
   "./manifest.webmanifest",
@@ -66,7 +67,7 @@ self.addEventListener("fetch", event => {
 
   if (request.method !== "GET" || url.origin !== self.location.origin) return;
 
-  const frequentlyUpdatedFiles = ["index.html", "official-bank.js", "questions.js", "app.js", "pwa.js"];
+  const frequentlyUpdatedFiles = ["index.html", "official-bank.js", "questions.js", "glossaire-notions-civiques.json", "app.js", "pwa.js"];
   const needsFreshContent = request.mode === "navigate"
     || frequentlyUpdatedFiles.some(file => url.pathname.endsWith(`/${file}`));
 

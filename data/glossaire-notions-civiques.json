@@ -1,0 +1,1076 @@
+{
+  "metadata": {
+    "titre": "Glossaire des notions civiques – Examen civique (naturalisation, carte de résident, carte de séjour pluriannuelle)",
+    "description": "Glossaire des notions clés de l'examen civique français instauré par le décret n° 2025-647, classées selon les cinq thématiques du programme fixé par l'arrêté du 10 octobre 2025. Chaque entrée comporte une définition rédigée, une référence juridique quand elle existe et des liens vers les notions associées.",
+    "version": "1.0.0",
+    "date_mise_a_jour": "2026-10-21",
+    "langue": "fr",
+    "licence": "Licence Ouverte / Open Licence version 2.0 (Etalab)",
+    "producteur": "examenciviquenaturalisation.fr",
+    "url_producteur": "https://examenciviquenaturalisation.fr",
+    "nombre_entrees": 81,
+    "thematiques": [
+      {
+        "id": "principes_valeurs",
+        "libelle": "Principes et valeurs de la République"
+      },
+      {
+        "id": "institutions",
+        "libelle": "Système institutionnel et politique"
+      },
+      {
+        "id": "droits_devoirs",
+        "libelle": "Droits et devoirs"
+      },
+      {
+        "id": "histoire_geo_culture",
+        "libelle": "Histoire, géographie et culture"
+      },
+      {
+        "id": "vie_en_societe",
+        "libelle": "Vivre dans la société française"
+      }
+    ],
+    "schema_entree": {
+      "id": "Identifiant stable (GLO-NNN)",
+      "slug": "Identifiant textuel, utilisé dans termes_lies",
+      "terme": "Notion définie",
+      "thematique": "Identifiant de la thématique du programme",
+      "definition": "Définition rédigée",
+      "reference": "Texte juridique de référence, ou null",
+      "termes_lies": "Liste de slugs d'autres entrées"
+    }
+  },
+  "entrees": [
+    {
+      "id": "GLO-001",
+      "slug": "republique",
+      "terme": "République",
+      "thematique": "principes_valeurs",
+      "definition": "Forme de gouvernement de la France depuis 1870 de façon continue (hors régime de Vichy). La Constitution la définit comme indivisible, laïque, démocratique et sociale. Sa forme républicaine ne peut faire l'objet d'aucune révision constitutionnelle.",
+      "reference": "Constitution du 4 octobre 1958, art. 1er et art. 89 al. 5",
+      "termes_lies": [
+        "indivisibilite",
+        "laicite",
+        "democratie",
+        "constitution-1958"
+      ]
+    },
+    {
+      "id": "GLO-002",
+      "slug": "devise",
+      "terme": "Devise de la République",
+      "thematique": "principes_valeurs",
+      "definition": "« Liberté, Égalité, Fraternité ». Héritée de la Révolution française, elle est inscrite dans la Constitution et figure au fronton des bâtiments publics.",
+      "reference": "Constitution du 4 octobre 1958, art. 2",
+      "termes_lies": [
+        "fraternite",
+        "egalite-devant-la-loi",
+        "revolution-francaise"
+      ]
+    },
+    {
+      "id": "GLO-003",
+      "slug": "laicite",
+      "terme": "Laïcité",
+      "thematique": "principes_valeurs",
+      "definition": "Principe qui sépare les Églises et l'État. L'État est neutre : il ne reconnaît, ne salarie ni ne subventionne aucun culte, et garantit la liberté de conscience et le libre exercice des cultes dans le respect de l'ordre public. L'Alsace et la Moselle conservent un régime particulier (concordat).",
+      "reference": "Loi du 9 décembre 1905 ; Constitution, art. 1er",
+      "termes_lies": [
+        "loi-1905",
+        "liberte-de-conscience",
+        "laicite-ecole",
+        "service-public"
+      ]
+    },
+    {
+      "id": "GLO-004",
+      "slug": "indivisibilite",
+      "terme": "Indivisibilité",
+      "thematique": "principes_valeurs",
+      "definition": "La République forme un tout : la souveraineté appartient au peuple dans son ensemble et une même loi s'applique sur tout le territoire, sans qu'une partie du peuple ou un territoire puisse s'en attribuer l'exercice. L'organisation de la République est par ailleurs décentralisée.",
+      "reference": "Constitution, art. 1er et art. 3",
+      "termes_lies": [
+        "republique",
+        "souverainete-nationale",
+        "collectivites-territoriales"
+      ]
+    },
+    {
+      "id": "GLO-005",
+      "slug": "democratie",
+      "terme": "Démocratie",
+      "thematique": "principes_valeurs",
+      "definition": "Régime dans lequel le pouvoir appartient au peuple. La Constitution reprend la formule « gouvernement du peuple, par le peuple et pour le peuple ». Les citoyens choisissent leurs représentants par des élections libres et peuvent être consultés par référendum.",
+      "reference": "Constitution, art. 2 et art. 3",
+      "termes_lies": [
+        "souverainete-nationale",
+        "suffrage-universel",
+        "referendum",
+        "droit-de-vote"
+      ]
+    },
+    {
+      "id": "GLO-006",
+      "slug": "souverainete-nationale",
+      "terme": "Souveraineté nationale",
+      "thematique": "principes_valeurs",
+      "definition": "Le pouvoir suprême appartient au peuple, qui l'exerce par ses représentants élus et par la voie du référendum. Aucune section du peuple ni aucun individu ne peut s'en attribuer l'exercice.",
+      "reference": "Constitution, art. 3",
+      "termes_lies": [
+        "democratie",
+        "referendum",
+        "suffrage-universel"
+      ]
+    },
+    {
+      "id": "GLO-007",
+      "slug": "fraternite",
+      "terme": "Fraternité",
+      "thematique": "principes_valeurs",
+      "definition": "Troisième terme de la devise, qui exprime la solidarité entre les membres de la communauté nationale. Le Conseil constitutionnel lui a reconnu en 2018 la valeur de principe constitutionnel, dont découle la liberté d'aider autrui dans un but humanitaire.",
+      "reference": "Constitution, art. 2 ; Conseil constitutionnel, décision n° 2018-717/718 QPC du 6 juillet 2018",
+      "termes_lies": [
+        "devise",
+        "securite-sociale",
+        "conseil-constitutionnel"
+      ]
+    },
+    {
+      "id": "GLO-008",
+      "slug": "egalite-femmes-hommes",
+      "terme": "Égalité entre les femmes et les hommes",
+      "thematique": "principes_valeurs",
+      "definition": "Les femmes ont dans tous les domaines des droits égaux à ceux des hommes. La loi favorise leur égal accès aux mandats électoraux, aux fonctions électives et aux responsabilités professionnelles et sociales.",
+      "reference": "Préambule de la Constitution de 1946, al. 3 ; Constitution, art. 1er al. 2",
+      "termes_lies": [
+        "droit-de-vote-des-femmes",
+        "egalite-professionnelle",
+        "non-discrimination"
+      ]
+    },
+    {
+      "id": "GLO-009",
+      "slug": "etat-de-droit",
+      "terme": "État de droit",
+      "thematique": "principes_valeurs",
+      "definition": "Situation dans laquelle chacun, y compris l'État et ses représentants, est soumis au respect du droit. Les normes sont hiérarchisées (Constitution, traités, lois, règlements) et des juges indépendants contrôlent leur application.",
+      "reference": null,
+      "termes_lies": [
+        "separation-des-pouvoirs",
+        "conseil-constitutionnel",
+        "bloc-de-constitutionnalite"
+      ]
+    },
+    {
+      "id": "GLO-010",
+      "slug": "ddhc",
+      "terme": "Déclaration des droits de l'homme et du citoyen",
+      "thematique": "principes_valeurs",
+      "definition": "Texte adopté le 26 août 1789 par l'Assemblée nationale constituante. Elle proclame des droits naturels et imprescriptibles (liberté, propriété, sûreté, résistance à l'oppression) et l'égalité des citoyens devant la loi. Elle a aujourd'hui valeur constitutionnelle.",
+      "reference": "Déclaration du 26 août 1789",
+      "termes_lies": [
+        "bloc-de-constitutionnalite",
+        "revolution-francaise",
+        "egalite-devant-la-loi"
+      ]
+    },
+    {
+      "id": "GLO-011",
+      "slug": "bloc-de-constitutionnalite",
+      "terme": "Bloc de constitutionnalité",
+      "thematique": "principes_valeurs",
+      "definition": "Ensemble des textes de valeur constitutionnelle : la Constitution de 1958, la Déclaration de 1789, le Préambule de la Constitution de 1946 et la Charte de l'environnement de 2004. Les lois doivent les respecter, sous le contrôle du Conseil constitutionnel.",
+      "reference": "Préambule de la Constitution du 4 octobre 1958",
+      "termes_lies": [
+        "constitution-1958",
+        "ddhc",
+        "conseil-constitutionnel"
+      ]
+    },
+    {
+      "id": "GLO-012",
+      "slug": "drapeau",
+      "terme": "Drapeau tricolore",
+      "thematique": "principes_valeurs",
+      "definition": "Emblème national, bleu, blanc, rouge. Il associe le blanc de la royauté au bleu et au rouge de la ville de Paris, et date de la Révolution française.",
+      "reference": "Constitution, art. 2",
+      "termes_lies": [
+        "marseillaise",
+        "marianne",
+        "fete-nationale"
+      ]
+    },
+    {
+      "id": "GLO-013",
+      "slug": "marseillaise",
+      "terme": "La Marseillaise",
+      "thematique": "principes_valeurs",
+      "definition": "Hymne national. Composé en 1792 à Strasbourg par Rouget de Lisle comme chant de guerre pour l'armée du Rhin, il doit son nom aux volontaires marseillais qui le chantèrent en arrivant à Paris.",
+      "reference": "Constitution, art. 2",
+      "termes_lies": [
+        "drapeau",
+        "revolution-francaise"
+      ]
+    },
+    {
+      "id": "GLO-014",
+      "slug": "marianne",
+      "terme": "Marianne",
+      "thematique": "principes_valeurs",
+      "definition": "Figure féminine qui personnifie la République. Coiffée d'un bonnet phrygien, symbole de liberté, elle est représentée par un buste dans les mairies et figure sur les timbres, les pièces et le logo de l'administration.",
+      "reference": null,
+      "termes_lies": [
+        "republique",
+        "drapeau"
+      ]
+    },
+    {
+      "id": "GLO-015",
+      "slug": "fete-nationale",
+      "terme": "Fête nationale (14 juillet)",
+      "thematique": "principes_valeurs",
+      "definition": "Fête nationale depuis la loi du 6 juillet 1880. Elle commémore la prise de la Bastille du 14 juillet 1789 et la fête de la Fédération du 14 juillet 1790, qui célébrait l'unité de la Nation.",
+      "reference": "Loi du 6 juillet 1880",
+      "termes_lies": [
+        "revolution-francaise",
+        "drapeau"
+      ]
+    },
+    {
+      "id": "GLO-016",
+      "slug": "langue-francaise",
+      "terme": "Langue de la République",
+      "thematique": "principes_valeurs",
+      "definition": "Le français est la langue de la République depuis la révision constitutionnelle de 1992. Il est la langue de l'enseignement, du travail, des échanges et des services publics. Les langues régionales appartiennent au patrimoine de la France.",
+      "reference": "Constitution, art. 2 et art. 75-1",
+      "termes_lies": [
+        "service-public",
+        "naturalisation"
+      ]
+    },
+    {
+      "id": "GLO-017",
+      "slug": "charte-droits-devoirs",
+      "terme": "Charte des droits et devoirs du citoyen français",
+      "thematique": "principes_valeurs",
+      "definition": "Document qui rappelle les principes, valeurs et symboles de la République ainsi que les droits et devoirs du citoyen. Le candidat à la naturalisation la signe, ce qui marque son adhésion à ces principes.",
+      "reference": "Code civil, art. 21-24",
+      "termes_lies": [
+        "naturalisation",
+        "citoyennete"
+      ]
+    },
+    {
+      "id": "GLO-018",
+      "slug": "constitution-1958",
+      "terme": "Constitution du 4 octobre 1958",
+      "thematique": "institutions",
+      "definition": "Texte fondateur de la Ve République, adopté par référendum le 28 septembre 1958 et promulgué le 4 octobre 1958. Elle organise les pouvoirs publics, leurs rapports et les grands principes de la République. Elle a été révisée plus de vingt fois.",
+      "reference": "Constitution du 4 octobre 1958",
+      "termes_lies": [
+        "cinquieme-republique",
+        "bloc-de-constitutionnalite",
+        "conseil-constitutionnel"
+      ]
+    },
+    {
+      "id": "GLO-019",
+      "slug": "separation-des-pouvoirs",
+      "terme": "Séparation des pouvoirs",
+      "thematique": "institutions",
+      "definition": "Principe, théorisé par Montesquieu, selon lequel les pouvoirs législatif (voter la loi), exécutif (l'appliquer) et judiciaire (juger) sont confiés à des organes distincts pour éviter les abus. Une société où elle n'est pas déterminée n'a pas de constitution.",
+      "reference": "Déclaration de 1789, art. 16",
+      "termes_lies": [
+        "parlement",
+        "gouvernement",
+        "autorite-judiciaire",
+        "etat-de-droit"
+      ]
+    },
+    {
+      "id": "GLO-020",
+      "slug": "president-de-la-republique",
+      "terme": "Président de la République",
+      "thematique": "institutions",
+      "definition": "Chef de l'État, élu pour cinq ans au suffrage universel direct. Il ne peut exercer plus de deux mandats consécutifs. Il veille au respect de la Constitution, nomme le Premier ministre, est chef des armées et garant de l'indépendance nationale.",
+      "reference": "Constitution, art. 5 à 19",
+      "termes_lies": [
+        "premier-ministre",
+        "suffrage-universel",
+        "cinquieme-republique"
+      ]
+    },
+    {
+      "id": "GLO-021",
+      "slug": "premier-ministre",
+      "terme": "Premier ministre",
+      "thematique": "institutions",
+      "definition": "Chef du Gouvernement, nommé par le Président de la République. Il dirige l'action du Gouvernement, assure l'exécution des lois et exerce le pouvoir réglementaire.",
+      "reference": "Constitution, art. 8 et art. 21",
+      "termes_lies": [
+        "gouvernement",
+        "president-de-la-republique",
+        "motion-de-censure"
+      ]
+    },
+    {
+      "id": "GLO-022",
+      "slug": "gouvernement",
+      "terme": "Gouvernement",
+      "thematique": "institutions",
+      "definition": "Ensemble formé du Premier ministre et des ministres. Il détermine et conduit la politique de la Nation, dispose de l'administration et de la force armée, et est responsable devant le Parlement.",
+      "reference": "Constitution, art. 20",
+      "termes_lies": [
+        "premier-ministre",
+        "motion-de-censure",
+        "parlement"
+      ]
+    },
+    {
+      "id": "GLO-023",
+      "slug": "parlement",
+      "terme": "Parlement",
+      "thematique": "institutions",
+      "definition": "Composé de l'Assemblée nationale et du Sénat. Il vote la loi, contrôle l'action du Gouvernement et évalue les politiques publiques.",
+      "reference": "Constitution, art. 24",
+      "termes_lies": [
+        "assemblee-nationale",
+        "senat",
+        "loi"
+      ]
+    },
+    {
+      "id": "GLO-024",
+      "slug": "assemblee-nationale",
+      "terme": "Assemblée nationale",
+      "thematique": "institutions",
+      "definition": "Chambre basse du Parlement, composée de 577 députés élus pour cinq ans au suffrage universel direct. Elle a le dernier mot en cas de désaccord avec le Sénat et peut renverser le Gouvernement. Elle siège au Palais Bourbon.",
+      "reference": "Constitution, art. 24 et art. 45",
+      "termes_lies": [
+        "parlement",
+        "senat",
+        "motion-de-censure"
+      ]
+    },
+    {
+      "id": "GLO-025",
+      "slug": "senat",
+      "terme": "Sénat",
+      "thematique": "institutions",
+      "definition": "Chambre haute du Parlement, composée de 348 sénateurs élus pour six ans au suffrage universel indirect par des « grands électeurs » (essentiellement des élus locaux). Il est renouvelé par moitié tous les trois ans et représente les collectivités territoriales. Il siège au palais du Luxembourg.",
+      "reference": "Constitution, art. 24",
+      "termes_lies": [
+        "parlement",
+        "assemblee-nationale",
+        "collectivites-territoriales"
+      ]
+    },
+    {
+      "id": "GLO-026",
+      "slug": "loi",
+      "terme": "Loi",
+      "thematique": "institutions",
+      "definition": "Règle générale votée par le Parlement. L'initiative appartient au Gouvernement (projet de loi) ou aux parlementaires (proposition de loi). Le Président de la République la promulgue, puis elle est publiée au Journal officiel. Nul n'est censé ignorer la loi.",
+      "reference": "Constitution, art. 34, 39 et 10",
+      "termes_lies": [
+        "parlement",
+        "conseil-constitutionnel",
+        "respect-des-lois"
+      ]
+    },
+    {
+      "id": "GLO-027",
+      "slug": "conseil-constitutionnel",
+      "terme": "Conseil constitutionnel",
+      "thematique": "institutions",
+      "definition": "Institution qui vérifie la conformité des lois à la Constitution, avant leur promulgation ou, depuis 2010, à l'occasion d'un procès (question prioritaire de constitutionnalité). Il compte neuf membres nommés pour neuf ans ; les anciens présidents de la République en sont membres de droit. Il veille aussi à la régularité des élections nationales.",
+      "reference": "Constitution, art. 56 à 63",
+      "termes_lies": [
+        "bloc-de-constitutionnalite",
+        "etat-de-droit",
+        "loi"
+      ]
+    },
+    {
+      "id": "GLO-028",
+      "slug": "referendum",
+      "terme": "Référendum",
+      "thematique": "institutions",
+      "definition": "Consultation par laquelle les électeurs approuvent ou rejettent directement un texte. Il peut porter sur certains projets de loi ou sur une révision de la Constitution.",
+      "reference": "Constitution, art. 11 et art. 89",
+      "termes_lies": [
+        "souverainete-nationale",
+        "democratie"
+      ]
+    },
+    {
+      "id": "GLO-029",
+      "slug": "motion-de-censure",
+      "terme": "Motion de censure",
+      "thematique": "institutions",
+      "definition": "Procédure par laquelle l'Assemblée nationale met en cause la responsabilité du Gouvernement. Si elle est adoptée à la majorité absolue des députés, le Premier ministre doit remettre la démission du Gouvernement.",
+      "reference": "Constitution, art. 49 et art. 50",
+      "termes_lies": [
+        "assemblee-nationale",
+        "gouvernement",
+        "premier-ministre"
+      ]
+    },
+    {
+      "id": "GLO-030",
+      "slug": "autorite-judiciaire",
+      "terme": "Autorité judiciaire",
+      "thematique": "institutions",
+      "definition": "Ensemble des juridictions qui tranchent les litiges entre personnes et sanctionnent les infractions. Elle est gardienne de la liberté individuelle et son indépendance est garantie par le Président de la République. La Cour de cassation est la plus haute juridiction de cet ordre.",
+      "reference": "Constitution, art. 64 et art. 66",
+      "termes_lies": [
+        "dualite-des-juridictions",
+        "separation-des-pouvoirs",
+        "presomption-d-innocence"
+      ]
+    },
+    {
+      "id": "GLO-031",
+      "slug": "dualite-des-juridictions",
+      "terme": "Dualité des juridictions",
+      "thematique": "institutions",
+      "definition": "La justice française comprend deux ordres : l'ordre judiciaire (litiges entre particuliers, infractions pénales), dominé par la Cour de cassation, et l'ordre administratif (litiges avec l'administration), dominé par le Conseil d'État.",
+      "reference": null,
+      "termes_lies": [
+        "autorite-judiciaire",
+        "conseil-d-etat"
+      ]
+    },
+    {
+      "id": "GLO-032",
+      "slug": "conseil-d-etat",
+      "terme": "Conseil d'État",
+      "thematique": "institutions",
+      "definition": "Institution qui conseille le Gouvernement sur les projets de loi et de décret, et qui est la plus haute juridiction de l'ordre administratif.",
+      "reference": "Constitution, art. 39",
+      "termes_lies": [
+        "dualite-des-juridictions",
+        "gouvernement"
+      ]
+    },
+    {
+      "id": "GLO-033",
+      "slug": "defenseur-des-droits",
+      "terme": "Défenseur des droits",
+      "thematique": "institutions",
+      "definition": "Autorité indépendante créée en 2008 et installée en 2011. Elle peut être saisie gratuitement par toute personne qui s'estime lésée par un service public ou victime de discrimination, et défend les droits des enfants.",
+      "reference": "Constitution, art. 71-1",
+      "termes_lies": [
+        "non-discrimination",
+        "service-public"
+      ]
+    },
+    {
+      "id": "GLO-034",
+      "slug": "collectivites-territoriales",
+      "terme": "Collectivités territoriales",
+      "thematique": "institutions",
+      "definition": "Personnes publiques distinctes de l'État, administrées par des conseils élus : communes, départements, régions, collectivités à statut particulier et collectivités d'outre-mer. Elles disposent de compétences propres dans le cadre de la décentralisation.",
+      "reference": "Constitution, art. 72",
+      "termes_lies": [
+        "commune",
+        "departement",
+        "region",
+        "prefet"
+      ]
+    },
+    {
+      "id": "GLO-035",
+      "slug": "commune",
+      "terme": "Commune",
+      "thematique": "institutions",
+      "definition": "Échelon de base de l'organisation territoriale ; la France en compte près de 35 000. Elle est administrée par un conseil municipal élu pour six ans, qui élit le maire. La mairie assure notamment l'état civil, les inscriptions sur les listes électorales et les écoles primaires.",
+      "reference": "Code général des collectivités territoriales",
+      "termes_lies": [
+        "maire",
+        "collectivites-territoriales",
+        "etat-civil"
+      ]
+    },
+    {
+      "id": "GLO-036",
+      "slug": "maire",
+      "terme": "Maire",
+      "thematique": "institutions",
+      "definition": "Élu par le conseil municipal, il dirige la commune et en exécute les décisions. Il est aussi agent de l'État : officier d'état civil (il célèbre les mariages) et officier de police judiciaire.",
+      "reference": "Code général des collectivités territoriales, art. L2122-4",
+      "termes_lies": [
+        "commune",
+        "etat-civil",
+        "mariage"
+      ]
+    },
+    {
+      "id": "GLO-037",
+      "slug": "departement",
+      "terme": "Département",
+      "thematique": "institutions",
+      "definition": "Collectivité créée en 1790 ; on en compte 101, dont 5 en outre-mer. Administré par un conseil départemental, il est chargé principalement de l'action sociale (RSA, aide à l'enfance, personnes âgées), des collèges et des routes départementales.",
+      "reference": "Constitution, art. 72",
+      "termes_lies": [
+        "collectivites-territoriales",
+        "prefet",
+        "region"
+      ]
+    },
+    {
+      "id": "GLO-038",
+      "slug": "region",
+      "terme": "Région",
+      "thematique": "institutions",
+      "definition": "Collectivité administrée par un conseil régional. La France compte 18 régions, dont 13 en métropole depuis la réforme de 2016 et 5 en outre-mer. Elles sont compétentes notamment pour les lycées, les transports régionaux et le développement économique.",
+      "reference": "Loi n° 2015-29 du 16 janvier 2015",
+      "termes_lies": [
+        "collectivites-territoriales",
+        "departement",
+        "outre-mer"
+      ]
+    },
+    {
+      "id": "GLO-039",
+      "slug": "prefet",
+      "terme": "Préfet",
+      "thematique": "institutions",
+      "definition": "Représentant de l'État dans le département et dans la région, nommé par décret du Président de la République en Conseil des ministres. Il veille au respect des lois, à l'ordre public et contrôle la légalité des actes des collectivités. La préfecture instruit notamment les titres de séjour et les demandes de naturalisation.",
+      "reference": "Constitution, art. 72 al. 6",
+      "termes_lies": [
+        "departement",
+        "naturalisation",
+        "collectivites-territoriales"
+      ]
+    },
+    {
+      "id": "GLO-040",
+      "slug": "union-europeenne",
+      "terme": "Union européenne",
+      "thematique": "institutions",
+      "definition": "Union politique et économique de 27 États membres, dont la France est membre fondateur. Ses principales institutions sont le Parlement européen, élu tous les cinq ans au suffrage universel direct, le Conseil européen, le Conseil de l'Union européenne et la Commission européenne.",
+      "reference": "Constitution, art. 88-1 ; Traité sur l'Union européenne",
+      "termes_lies": [
+        "construction-europeenne",
+        "euro",
+        "droit-de-vote"
+      ]
+    },
+    {
+      "id": "GLO-041",
+      "slug": "suffrage-universel",
+      "terme": "Suffrage universel",
+      "thematique": "institutions",
+      "definition": "Droit de vote reconnu à tous les citoyens majeurs, sans condition de fortune, de sexe ou d'instruction. Il est direct quand les électeurs élisent eux-mêmes leurs représentants, indirect quand ils passent par des élus intermédiaires. Le vote est toujours égal et secret.",
+      "reference": "Constitution, art. 3",
+      "termes_lies": [
+        "droit-de-vote",
+        "droit-de-vote-des-femmes",
+        "democratie"
+      ]
+    },
+    {
+      "id": "GLO-042",
+      "slug": "citoyennete",
+      "terme": "Citoyenneté",
+      "thematique": "droits_devoirs",
+      "definition": "Qualité de la personne qui, membre de la communauté nationale, jouit de droits civils et politiques (notamment voter et être élu) et s'engage à respecter ses devoirs envers la collectivité.",
+      "reference": null,
+      "termes_lies": [
+        "droit-de-vote",
+        "nationalite-francaise",
+        "charte-droits-devoirs"
+      ]
+    },
+    {
+      "id": "GLO-043",
+      "slug": "droit-de-vote",
+      "terme": "Droit de vote",
+      "thematique": "droits_devoirs",
+      "definition": "Les Français majeurs (18 ans) jouissant de leurs droits civiques peuvent voter, après inscription sur les listes électorales. Voter est un droit et un devoir civique, mais n'est pas obligatoire. Les citoyens de l'Union européenne résidant en France peuvent voter aux élections municipales et européennes.",
+      "reference": "Constitution, art. 3 et art. 88-3 ; Code électoral",
+      "termes_lies": [
+        "suffrage-universel",
+        "citoyennete",
+        "union-europeenne"
+      ]
+    },
+    {
+      "id": "GLO-044",
+      "slug": "egalite-devant-la-loi",
+      "terme": "Égalité devant la loi",
+      "thematique": "droits_devoirs",
+      "definition": "La loi est la même pour tous, qu'elle protège ou qu'elle punisse. La République assure l'égalité de tous les citoyens sans distinction d'origine, de race ou de religion.",
+      "reference": "Déclaration de 1789, art. 1er et art. 6 ; Constitution, art. 1er",
+      "termes_lies": [
+        "non-discrimination",
+        "devise",
+        "ddhc"
+      ]
+    },
+    {
+      "id": "GLO-045",
+      "slug": "non-discrimination",
+      "terme": "Non-discrimination",
+      "thematique": "droits_devoirs",
+      "definition": "Interdiction de traiter une personne moins favorablement en raison de critères tels que l'origine, le sexe, la religion, le handicap, l'âge ou l'orientation sexuelle, notamment pour l'emploi, le logement ou l'accès à un service. La discrimination est un délit.",
+      "reference": "Code pénal, art. 225-1 et 225-2",
+      "termes_lies": [
+        "egalite-devant-la-loi",
+        "defenseur-des-droits",
+        "egalite-femmes-hommes"
+      ]
+    },
+    {
+      "id": "GLO-046",
+      "slug": "liberte-d-expression",
+      "terme": "Liberté d'expression",
+      "thematique": "droits_devoirs",
+      "definition": "Chacun peut parler, écrire et publier librement, sous réserve de répondre des abus prévus par la loi : diffamation, injure, provocation à la haine ou à la violence, apologie du terrorisme, négationnisme.",
+      "reference": "Déclaration de 1789, art. 11 ; loi du 29 juillet 1881 sur la liberté de la presse",
+      "termes_lies": [
+        "ddhc",
+        "etat-de-droit"
+      ]
+    },
+    {
+      "id": "GLO-047",
+      "slug": "liberte-de-conscience",
+      "terme": "Liberté de conscience et de religion",
+      "thematique": "droits_devoirs",
+      "definition": "Chacun est libre de croire, de ne pas croire ou de changer de religion, et de pratiquer son culte, dans le respect de l'ordre public. Nul ne peut être inquiété pour ses opinions, même religieuses.",
+      "reference": "Déclaration de 1789, art. 10 ; loi du 9 décembre 1905, art. 1er",
+      "termes_lies": [
+        "laicite",
+        "loi-1905"
+      ]
+    },
+    {
+      "id": "GLO-048",
+      "slug": "presomption-d-innocence",
+      "terme": "Présomption d'innocence",
+      "thematique": "droits_devoirs",
+      "definition": "Toute personne est présumée innocente tant que sa culpabilité n'a pas été établie par un jugement définitif.",
+      "reference": "Déclaration de 1789, art. 9 ; Code de procédure pénale, article préliminaire",
+      "termes_lies": [
+        "autorite-judiciaire",
+        "etat-de-droit"
+      ]
+    },
+    {
+      "id": "GLO-049",
+      "slug": "droit-de-greve-syndicat",
+      "terme": "Droit de grève et liberté syndicale",
+      "thematique": "droits_devoirs",
+      "definition": "Chacun peut défendre ses droits et intérêts par l'action syndicale et adhérer au syndicat de son choix. Le droit de grève s'exerce dans le cadre des lois qui le réglementent, avec par exemple un service minimum dans certains services publics.",
+      "reference": "Préambule de la Constitution de 1946, al. 6 et 7",
+      "termes_lies": [
+        "bloc-de-constitutionnalite",
+        "service-public"
+      ]
+    },
+    {
+      "id": "GLO-050",
+      "slug": "impot",
+      "terme": "Contribution commune (impôt)",
+      "thematique": "droits_devoirs",
+      "definition": "Chacun contribue aux dépenses publiques en fonction de ses capacités. Payer ses impôts et déclarer ses revenus sont des obligations légales ; les citoyens ont le droit de consentir à l'impôt par leurs représentants.",
+      "reference": "Déclaration de 1789, art. 13 et art. 14",
+      "termes_lies": [
+        "service-public",
+        "securite-sociale",
+        "parlement"
+      ]
+    },
+    {
+      "id": "GLO-051",
+      "slug": "respect-des-lois",
+      "terme": "Respect des lois",
+      "thematique": "droits_devoirs",
+      "definition": "Devoir de toute personne vivant en France, française ou étrangère. Nul ne peut invoquer sa religion, ses convictions ou ses coutumes pour s'affranchir des règles communes.",
+      "reference": "Déclaration de 1789, art. 5 et art. 7",
+      "termes_lies": [
+        "loi",
+        "etat-de-droit",
+        "laicite"
+      ]
+    },
+    {
+      "id": "GLO-052",
+      "slug": "scolarite-obligatoire",
+      "terme": "Instruction obligatoire",
+      "thematique": "droits_devoirs",
+      "definition": "L'instruction est obligatoire pour tous les enfants, français et étrangers, de 3 à 16 ans, puis une obligation de formation s'applique jusqu'à 18 ans. L'enseignement public est gratuit et laïque.",
+      "reference": "Code de l'éducation, art. L131-1 ; loi n° 2019-791 du 26 juillet 2019",
+      "termes_lies": [
+        "lois-jules-ferry",
+        "laicite-ecole",
+        "autorite-parentale"
+      ]
+    },
+    {
+      "id": "GLO-053",
+      "slug": "autorite-parentale",
+      "terme": "Autorité parentale",
+      "thematique": "droits_devoirs",
+      "definition": "Ensemble de droits et de devoirs exercés en commun par les deux parents jusqu'à la majorité de l'enfant, dans son intérêt : protéger sa sécurité, sa santé et sa moralité, assurer son éducation et respecter sa personne. Les violences physiques ou psychologiques sont exclues.",
+      "reference": "Code civil, art. 371-1",
+      "termes_lies": [
+        "scolarite-obligatoire",
+        "egalite-femmes-hommes"
+      ]
+    },
+    {
+      "id": "GLO-054",
+      "slug": "recensement-jdc",
+      "terme": "Recensement citoyen et Journée défense et citoyenneté (JDC)",
+      "thematique": "droits_devoirs",
+      "definition": "Tout jeune Français doit se faire recenser à la mairie à 16 ans, puis participer à la JDC. L'attestation correspondante est exigée pour s'inscrire à certains examens et concours publics, dont le permis de conduire, avant 25 ans.",
+      "reference": "Code du service national, art. L111-2 et L113-1",
+      "termes_lies": [
+        "citoyennete",
+        "commune"
+      ]
+    },
+    {
+      "id": "GLO-055",
+      "slug": "nationalite-francaise",
+      "terme": "Nationalité française",
+      "thematique": "droits_devoirs",
+      "definition": "Lien juridique entre une personne et l'État français. Elle s'obtient par attribution à la naissance (filiation, double droit du sol) ou par acquisition : naturalisation, déclaration à raison du mariage, ou acquisition de plein droit à la majorité pour un enfant né et élevé en France.",
+      "reference": "Code civil, art. 17 et suivants",
+      "termes_lies": [
+        "naturalisation",
+        "droit-du-sol",
+        "mariage",
+        "citoyennete"
+      ]
+    },
+    {
+      "id": "GLO-056",
+      "slug": "naturalisation",
+      "terme": "Naturalisation",
+      "thematique": "droits_devoirs",
+      "definition": "Acquisition de la nationalité française accordée par décret, à la demande d'un étranger majeur. C'est une décision de l'autorité publique, pas un droit. Elle suppose notamment une résidence habituelle en France de cinq ans (sauf réduction), l'assimilation à la communauté française (langue, connaissance de l'histoire, de la culture et des valeurs, adhésion aux principes de la République) et la signature de la charte des droits et devoirs.",
+      "reference": "Code civil, art. 21-15 à 21-25",
+      "termes_lies": [
+        "nationalite-francaise",
+        "examen-civique",
+        "charte-droits-devoirs",
+        "prefet"
+      ]
+    },
+    {
+      "id": "GLO-057",
+      "slug": "droit-du-sol",
+      "terme": "Droit du sol",
+      "thematique": "droits_devoirs",
+      "definition": "Règles qui lient la nationalité au lieu de naissance. Est français l'enfant né en France d'un parent lui-même né en France (double droit du sol). L'enfant né en France de parents étrangers devient français à sa majorité s'il réside en France et y a résidé au moins cinq ans depuis l'âge de 11 ans ; il peut aussi le réclamer par anticipation.",
+      "reference": "Code civil, art. 19-3, 21-7 et 21-11",
+      "termes_lies": [
+        "nationalite-francaise"
+      ]
+    },
+    {
+      "id": "GLO-058",
+      "slug": "examen-civique",
+      "terme": "Examen civique",
+      "thematique": "droits_devoirs",
+      "definition": "Épreuve obligatoire depuis le 1er janvier 2026 pour les demandes de naturalisation, de carte de résident et de carte de séjour pluriannuelle. Elle prend la forme d'un QCM de 40 questions en 45 minutes ; il faut au moins 80 % de bonnes réponses (32/40). Le programme couvre cinq thématiques fixées par arrêté.",
+      "reference": "Décret n° 2025-647 ; arrêté du 10 octobre 2025",
+      "termes_lies": [
+        "naturalisation",
+        "charte-droits-devoirs",
+        "langue-francaise"
+      ]
+    },
+    {
+      "id": "GLO-059",
+      "slug": "revolution-francaise",
+      "terme": "Révolution française",
+      "thematique": "histoire_geo_culture",
+      "definition": "Période ouverte en 1789 qui met fin à la monarchie absolue et aux privilèges (nuit du 4 août 1789). Elle produit la Déclaration des droits de l'homme et du citoyen, et la Ire République est proclamée en septembre 1792.",
+      "reference": null,
+      "termes_lies": [
+        "ddhc",
+        "fete-nationale",
+        "devise",
+        "marseillaise"
+      ]
+    },
+    {
+      "id": "GLO-060",
+      "slug": "abolition-esclavage",
+      "terme": "Abolition de l'esclavage",
+      "thematique": "histoire_geo_culture",
+      "definition": "Une première abolition votée en 1794 est annulée par Napoléon Bonaparte en 1802. L'abolition définitive est décrétée le 27 avril 1848 à l'initiative de Victor Schœlcher. En 2001, la loi Taubira reconnaît la traite et l'esclavage comme crimes contre l'humanité.",
+      "reference": "Décret du 27 avril 1848 ; loi n° 2001-434 du 21 mai 2001",
+      "termes_lies": [
+        "outre-mer",
+        "egalite-devant-la-loi"
+      ]
+    },
+    {
+      "id": "GLO-061",
+      "slug": "lois-jules-ferry",
+      "terme": "Lois Jules Ferry",
+      "thematique": "histoire_geo_culture",
+      "definition": "Lois de 1881 et 1882 qui rendent l'école primaire publique gratuite, laïque et obligatoire pour les filles comme pour les garçons de 6 à 13 ans.",
+      "reference": "Lois du 16 juin 1881 et du 28 mars 1882",
+      "termes_lies": [
+        "scolarite-obligatoire",
+        "laicite-ecole"
+      ]
+    },
+    {
+      "id": "GLO-062",
+      "slug": "loi-1905",
+      "terme": "Loi du 9 décembre 1905",
+      "thematique": "histoire_geo_culture",
+      "definition": "Loi de séparation des Églises et de l'État. Elle garantit la liberté de conscience et le libre exercice des cultes, et met fin au financement public des cultes. Elle est le fondement juridique de la laïcité.",
+      "reference": "Loi du 9 décembre 1905",
+      "termes_lies": [
+        "laicite",
+        "liberte-de-conscience"
+      ]
+    },
+    {
+      "id": "GLO-063",
+      "slug": "guerres-mondiales",
+      "terme": "Armistice du 11 novembre 1918 et victoire du 8 mai 1945",
+      "thematique": "histoire_geo_culture",
+      "definition": "Deux jours fériés de commémoration. Le 11 novembre marque la fin des combats de la Première Guerre mondiale ; le 8 mai, la capitulation de l'Allemagne nazie et la fin de la Seconde Guerre mondiale en Europe.",
+      "reference": null,
+      "termes_lies": [
+        "construction-europeenne",
+        "droit-de-vote-des-femmes"
+      ]
+    },
+    {
+      "id": "GLO-064",
+      "slug": "droit-de-vote-des-femmes",
+      "terme": "Droit de vote des femmes",
+      "thematique": "histoire_geo_culture",
+      "definition": "Accordé par l'ordonnance du 21 avril 1944. Les femmes votent pour la première fois lors des élections municipales d'avril-mai 1945.",
+      "reference": "Ordonnance du 21 avril 1944",
+      "termes_lies": [
+        "suffrage-universel",
+        "egalite-femmes-hommes"
+      ]
+    },
+    {
+      "id": "GLO-065",
+      "slug": "cinquieme-republique",
+      "terme": "Ve République",
+      "thematique": "histoire_geo_culture",
+      "definition": "Régime politique en vigueur depuis 1958, fondé à l'initiative du général de Gaulle, qui en devient le premier président. Depuis le référendum de 1962, le Président est élu au suffrage universel direct ; depuis 2000, son mandat est de cinq ans (quinquennat).",
+      "reference": "Constitution du 4 octobre 1958",
+      "termes_lies": [
+        "constitution-1958",
+        "president-de-la-republique"
+      ]
+    },
+    {
+      "id": "GLO-066",
+      "slug": "abolition-peine-de-mort",
+      "terme": "Abolition de la peine de mort",
+      "thematique": "histoire_geo_culture",
+      "definition": "Votée par la loi du 9 octobre 1981, défendue par le garde des Sceaux Robert Badinter. Depuis 2007, la Constitution dispose que nul ne peut être condamné à la peine de mort.",
+      "reference": "Loi n° 81-908 du 9 octobre 1981 ; Constitution, art. 66-1",
+      "termes_lies": [
+        "etat-de-droit",
+        "autorite-judiciaire"
+      ]
+    },
+    {
+      "id": "GLO-067",
+      "slug": "ivg",
+      "terme": "Interruption volontaire de grossesse (IVG)",
+      "thematique": "histoire_geo_culture",
+      "definition": "Dépénalisée par la loi Veil de 1975, portée par la ministre Simone Veil. Depuis la révision constitutionnelle du 8 mars 2024, la Constitution garantit la liberté de la femme d'y recourir, dans les conditions fixées par la loi.",
+      "reference": "Loi n° 75-17 du 17 janvier 1975 ; Constitution, art. 34",
+      "termes_lies": [
+        "egalite-femmes-hommes",
+        "constitution-1958"
+      ]
+    },
+    {
+      "id": "GLO-068",
+      "slug": "construction-europeenne",
+      "terme": "Construction européenne",
+      "thematique": "histoire_geo_culture",
+      "definition": "Processus engagé après la Seconde Guerre mondiale pour garantir la paix : Communauté européenne du charbon et de l'acier (1951), traité de Rome créant la Communauté économique européenne (1957), traité de Maastricht créant l'Union européenne (1992).",
+      "reference": null,
+      "termes_lies": [
+        "union-europeenne",
+        "euro",
+        "guerres-mondiales"
+      ]
+    },
+    {
+      "id": "GLO-069",
+      "slug": "euro",
+      "terme": "Euro",
+      "thematique": "histoire_geo_culture",
+      "definition": "Monnaie unique de la zone euro, créée en 1999 ; les pièces et billets circulent en France depuis le 1er janvier 2002, en remplacement du franc.",
+      "reference": null,
+      "termes_lies": [
+        "union-europeenne",
+        "construction-europeenne"
+      ]
+    },
+    {
+      "id": "GLO-070",
+      "slug": "outre-mer",
+      "terme": "Outre-mer",
+      "thematique": "histoire_geo_culture",
+      "definition": "Territoires français situés hors du continent européen. Cinq sont à la fois départements et régions : Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. D'autres collectivités ont un statut particulier (Polynésie française, Saint-Pierre-et-Miquelon, Wallis-et-Futuna, Saint-Martin, Saint-Barthélemy, Nouvelle-Calédonie).",
+      "reference": "Constitution, art. 72-3, 73, 74 et titre XIII",
+      "termes_lies": [
+        "region",
+        "departement",
+        "abolition-esclavage"
+      ]
+    },
+    {
+      "id": "GLO-071",
+      "slug": "service-public",
+      "terme": "Service public",
+      "thematique": "vie_en_societe",
+      "definition": "Activité d'intérêt général assurée ou contrôlée par une personne publique (éducation, santé, justice, transports…). Il obéit aux principes de continuité, d'égalité d'accès et d'adaptabilité, et ses agents sont soumis à une stricte neutralité, notamment religieuse.",
+      "reference": null,
+      "termes_lies": [
+        "laicite",
+        "egalite-devant-la-loi",
+        "defenseur-des-droits"
+      ]
+    },
+    {
+      "id": "GLO-072",
+      "slug": "laicite-ecole",
+      "terme": "Laïcité à l'école",
+      "thematique": "vie_en_societe",
+      "definition": "Dans les écoles, collèges et lycées publics, le port par les élèves de signes ou tenues manifestant ostensiblement une appartenance religieuse est interdit. Les enseignants sont tenus à la neutralité.",
+      "reference": "Loi n° 2004-228 du 15 mars 2004 ; Code de l'éducation, art. L141-5-1",
+      "termes_lies": [
+        "laicite",
+        "scolarite-obligatoire",
+        "lois-jules-ferry"
+      ]
+    },
+    {
+      "id": "GLO-073",
+      "slug": "dissimulation-visage",
+      "terme": "Interdiction de la dissimulation du visage",
+      "thematique": "vie_en_societe",
+      "definition": "Nul ne peut, dans l'espace public, porter une tenue destinée à dissimuler son visage, sauf exceptions prévues par la loi (raisons de santé, motifs professionnels, fêtes ou manifestations traditionnelles).",
+      "reference": "Loi n° 2010-1192 du 11 octobre 2010",
+      "termes_lies": [
+        "respect-des-lois",
+        "laicite"
+      ]
+    },
+    {
+      "id": "GLO-074",
+      "slug": "mariage",
+      "terme": "Mariage civil",
+      "thematique": "vie_en_societe",
+      "definition": "Union célébrée publiquement en mairie par un officier d'état civil. Il repose sur le libre consentement des deux époux : le mariage forcé est interdit, comme la polygamie. Il est ouvert aux couples de même sexe depuis 2013. Une cérémonie religieuse ne peut avoir lieu qu'après le mariage civil.",
+      "reference": "Code civil, art. 143 à 147 ; loi n° 2013-404 du 17 mai 2013 ; Code pénal, art. 433-21",
+      "termes_lies": [
+        "maire",
+        "pacs",
+        "egalite-femmes-hommes",
+        "etat-civil"
+      ]
+    },
+    {
+      "id": "GLO-075",
+      "slug": "pacs",
+      "terme": "Pacte civil de solidarité (PACS)",
+      "thematique": "vie_en_societe",
+      "definition": "Contrat conclu par deux personnes majeures, de sexe différent ou de même sexe, pour organiser leur vie commune. Créé en 1999, il est enregistré en mairie ou chez un notaire.",
+      "reference": "Loi n° 99-944 du 15 novembre 1999 ; Code civil, art. 515-1",
+      "termes_lies": [
+        "mariage",
+        "etat-civil"
+      ]
+    },
+    {
+      "id": "GLO-076",
+      "slug": "etat-civil",
+      "terme": "État civil",
+      "thematique": "vie_en_societe",
+      "definition": "Ensemble des actes (naissance, mariage, décès) tenus par la mairie qui établissent l'identité et la situation familiale d'une personne. Toute naissance doit être déclarée à la mairie dans les cinq jours.",
+      "reference": "Code civil, art. 34 et suivants ; art. 55",
+      "termes_lies": [
+        "commune",
+        "maire",
+        "mariage"
+      ]
+    },
+    {
+      "id": "GLO-077",
+      "slug": "securite-sociale",
+      "terme": "Sécurité sociale",
+      "thematique": "vie_en_societe",
+      "definition": "Système de protection créé par les ordonnances d'octobre 1945, fondé sur la solidarité. Il couvre la maladie, les accidents du travail, la retraite, la famille et l'autonomie, et est financé principalement par les cotisations et la CSG.",
+      "reference": "Ordonnances des 4 et 19 octobre 1945 ; Code de la sécurité sociale",
+      "termes_lies": [
+        "fraternite",
+        "assurance-maladie",
+        "impot"
+      ]
+    },
+    {
+      "id": "GLO-078",
+      "slug": "assurance-maladie",
+      "terme": "Assurance maladie et carte Vitale",
+      "thematique": "vie_en_societe",
+      "definition": "Branche de la Sécurité sociale qui rembourse tout ou partie des soins. La carte Vitale atteste des droits de l'assuré. Déclarer un médecin traitant permet d'être mieux remboursé dans le parcours de soins coordonnés.",
+      "reference": "Code de la sécurité sociale",
+      "termes_lies": [
+        "securite-sociale",
+        "numeros-urgence"
+      ]
+    },
+    {
+      "id": "GLO-079",
+      "slug": "numeros-urgence",
+      "terme": "Numéros d'urgence",
+      "thematique": "vie_en_societe",
+      "definition": "Numéros gratuits : 15 (SAMU, urgence médicale), 17 (police ou gendarmerie), 18 (pompiers), 112 (numéro d'urgence européen), 114 (urgence par SMS pour les personnes sourdes ou malentendantes), 115 (SAMU social), 119 (enfance en danger), 3919 (violences faites aux femmes).",
+      "reference": null,
+      "termes_lies": [
+        "assurance-maladie",
+        "service-public"
+      ]
+    },
+    {
+      "id": "GLO-080",
+      "slug": "egalite-professionnelle",
+      "terme": "Égalité professionnelle",
+      "thematique": "vie_en_societe",
+      "definition": "L'employeur doit assurer, pour un même travail ou un travail de valeur égale, l'égalité de rémunération entre les femmes et les hommes. Les entreprises d'au moins 50 salariés publient chaque année un index de l'égalité professionnelle.",
+      "reference": "Code du travail, art. L3221-2 et L1142-8",
+      "termes_lies": [
+        "egalite-femmes-hommes",
+        "non-discrimination"
+      ]
+    },
+    {
+      "id": "GLO-081",
+      "slug": "association-1901",
+      "terme": "Association (loi de 1901)",
+      "thematique": "vie_en_societe",
+      "definition": "Groupement d'au moins deux personnes qui mettent en commun leurs connaissances ou leur activité dans un but autre que le partage de bénéfices. La liberté d'association est un principe à valeur constitutionnelle ; les associations subventionnées signent un contrat d'engagement républicain.",
+      "reference": "Loi du 1er juillet 1901 ; loi n° 2021-1109 du 24 août 2021",
+      "termes_lies": [
+        "citoyennete",
+        "fraternite"
+      ]
+    }
+  ]
+}
