@@ -18,7 +18,7 @@ Application statique de révision de l’examen civique pour la naturalisation f
 - thème clair et sombre
 - application web installable (PWA) avec fonctionnement hors connexion
 - bouton d’installation directe sur les navigateurs compatibles et aide dédiée sur iPhone/iPad
-- notification lorsqu’une nouvelle version est disponible
+- vérification immédiate des mises à jour, notification avant installation et confirmation après activation
 - indicateur de connexion et interface adaptée aux zones sûres des appareils mobiles
 - interface responsive et utilisable au clavier
 

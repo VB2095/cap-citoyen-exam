@@ -4,6 +4,7 @@
   const installButton = document.querySelector("#install-app");
   const installDialog = document.querySelector("#install-dialog");
   const updateNotice = document.querySelector("#pwa-update");
+  const updateMessage = updateNotice.querySelector("span");
   const updateButton = document.querySelector("#apply-update");
   const connectionStatus = document.querySelector("#connection-status");
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
@@ -15,6 +16,8 @@
   let refreshing = false;
   let registration = null;
   let connectionTimer = null;
+  let updateNoticeTimer = null;
+  const VERSION_KEY = "cap-citoyen-app-version";
 
   document.documentElement.classList.toggle("is-standalone", isStandalone);
 
@@ -75,8 +78,40 @@
   updateConnectionStatus();
 
   function showUpdate(worker) {
+    window.clearTimeout(updateNoticeTimer);
     waitingWorker = worker;
+    updateMessage.textContent = "Une nouvelle version de Cap Citoyen est disponible.";
+    updateButton.hidden = false;
     updateNotice.hidden = false;
+  }
+
+  function showUpdatedConfirmation() {
+    if (waitingWorker) return;
+    window.clearTimeout(updateNoticeTimer);
+    updateMessage.textContent = "Cap Citoyen a été mis à jour.";
+    updateButton.hidden = true;
+    updateNotice.hidden = false;
+    updateNoticeTimer = window.setTimeout(() => { updateNotice.hidden = true; }, 4500);
+  }
+
+  function rememberActiveVersion(version) {
+    if (!version) return;
+    const previousVersion = localStorage.getItem(VERSION_KEY);
+    localStorage.setItem(VERSION_KEY, version);
+    if (previousVersion && previousVersion !== version) showUpdatedConfirmation();
+  }
+
+  function requestActiveVersion() {
+    navigator.serviceWorker.controller?.postMessage({ type: "GET_VERSION" });
+  }
+
+  function watchInstallingWorker(worker) {
+    if (!worker) return;
+    worker.addEventListener("statechange", () => {
+      if (worker.state === "installed" && navigator.serviceWorker.controller) {
+        showUpdate(worker);
+      }
+    });
   }
 
   updateButton.addEventListener("click", () => {
@@ -84,25 +119,29 @@
   });
 
   if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.addEventListener("message", event => {
+      if (event.data?.type === "APP_VERSION") rememberActiveVersion(event.data.version);
+    });
+
     window.addEventListener("load", async () => {
       try {
         registration = await navigator.serviceWorker.register("./service-worker.js");
+
+        registration.addEventListener("updatefound", () => {
+          watchInstallingWorker(registration.installing);
+        });
+
+        watchInstallingWorker(registration.installing);
 
         if (registration.waiting && navigator.serviceWorker.controller) {
           showUpdate(registration.waiting);
         }
 
-        registration.addEventListener("updatefound", () => {
-          const installingWorker = registration.installing;
-          if (!installingWorker) return;
-          installingWorker.addEventListener("statechange", () => {
-            if (installingWorker.state === "installed" && navigator.serviceWorker.controller) {
-              showUpdate(installingWorker);
-            }
-          });
-        });
+        requestActiveVersion();
+        await registration.update();
+        if (registration.waiting && navigator.serviceWorker.controller) showUpdate(registration.waiting);
 
-        window.setInterval(() => registration.update(), 60 * 60 * 1000);
+        window.setInterval(() => registration.update(), 15 * 60 * 1000);
       } catch (error) {
         console.warn("Le mode hors connexion n’a pas pu être activé.", error);
       }
@@ -115,7 +154,10 @@
     });
 
     document.addEventListener("visibilitychange", () => {
-      if (document.visibilityState === "visible" && navigator.onLine) registration?.update();
+      if (document.visibilityState === "visible" && navigator.onLine) {
+        requestActiveVersion();
+        registration?.update();
+      }
     });
   }
 })();

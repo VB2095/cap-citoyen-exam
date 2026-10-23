@@ -261,6 +261,7 @@ h3 { font-size: 1.2rem; }
 .pwa-update[hidden] { display: none; }
 .pwa-update span { flex: 1; }
 .pwa-update .button { flex: 0 0 auto; }
+.pwa-update .button[hidden] { display: none; }
 
 @media (max-width: 800px) {
   .site-header { position: sticky; top: 0; }

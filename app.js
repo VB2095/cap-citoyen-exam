@@ -1628,7 +1628,7 @@
       <div class="privacy-list">
         <section class="privacy-section">
           <h2>Données enregistrées localement</h2>
-          <p>Votre progression, les cartes à revoir, les échéances de répétition espacée, la session d’examen en cours et votre préférence de thème sont enregistrées dans le stockage de votre navigateur.</p>
+          <p>Votre progression, les cartes à revoir, les échéances de répétition espacée, la session d’examen en cours, votre préférence de thème et la version technique de l’application sont enregistrées dans le stockage de votre navigateur.</p>
           <p>Ces informations servent uniquement à retrouver votre parcours sur cet appareil. Le code de Cap Citoyen ne les transmet à aucun serveur et ne peut pas les synchroniser avec un autre appareil.</p>
         </section>
 
@@ -1663,6 +1663,7 @@
       localStorage.removeItem(STORAGE_KEY);
       localStorage.removeItem(EXAM_KEY);
       localStorage.removeItem("cap-citoyen-theme");
+      localStorage.removeItem("cap-citoyen-app-version");
       sessionStorage.removeItem("cap-citoyen-last-result");
       progress = initialProgress();
       saveProgress();

@@ -1,4 +1,4 @@
-const CACHE_NAME = "cap-citoyen-v4";
+const CACHE_NAME = "cap-citoyen-v7";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -28,6 +28,9 @@ self.addEventListener("activate", event => {
 
 self.addEventListener("message", event => {
   if (event.data?.type === "SKIP_WAITING") self.skipWaiting();
+  if (event.data?.type === "GET_VERSION") {
+    event.source?.postMessage({ type: "APP_VERSION", version: CACHE_NAME });
+  }
 });
 
 async function networkFirst(request) {
