@@ -15,6 +15,7 @@
   let practiceSession = null;
   let activeUtterance = null;
   let glossaryDataPromise = null;
+  let glossaryData = null;
 
   const sourceUrls = {
     livret: "https://www.legifrance.gouv.fr/download/pdf?id=isr0azgWEe4wSbu_Z-hm_3tIAj0JcaOEDqWIfclQeWk=",
@@ -1132,7 +1133,7 @@
       : "";
     const sourceLabel = q.answers ? "Source de la question et attribution" : "Source officielle";
     const attribution = q.answers ? `<p class="source-note">Réponse pédagogique indépendante proposée par leqcmcivique.fr ; l’administration ne publie pas de corrigé officiel.${external ? " La ressource Wikipédia apporte uniquement un contexte complémentaire." : ""}</p>` : "";
-    return `<div class="short-answer"><span>Réponse à retenir</span><strong>${answer}</strong></div>${acceptedAnswers}<section class="explanation-box"><div class="explanation-heading"><h3>${showEnglish ? "To understand" : "Pour comprendre"}</h3><button class="translation-button" id="toggle-translation" type="button" lang="${showEnglish ? "en" : "fr"}">${showEnglish ? "Lire en français" : "Read in English"}</button></div><p class="explanation-main" lang="${showEnglish ? "en" : "fr"}">${showEnglish ? why.en : why.fr}</p>${context}<aside class="trap-box" lang="${showEnglish ? "en" : "fr"}"><strong>${showEnglish ? "Common trap" : "Piège fréquent"}</strong><p>${showEnglish ? trap.en : trap.fr}</p></aside></section><div class="answer-sources"><a href="${sourceUrls[q.source]}" target="_blank" rel="noopener">${sourceLabel} <span aria-hidden="true">↗</span></a>${externalLink}</div>${attribution}`;
+    return `<div class="short-answer"><span>Réponse à retenir</span><strong>${answer}</strong></div>${acceptedAnswers}<section class="explanation-box"><div class="explanation-heading"><h3>${showEnglish ? "To understand" : "Pour comprendre"}</h3><button class="translation-button" id="toggle-translation" type="button" lang="${showEnglish ? "en" : "fr"}">${showEnglish ? "Lire en français" : "Read in English"}</button></div><p class="explanation-main" lang="${showEnglish ? "en" : "fr"}">${showEnglish ? why.en : why.fr}</p>${context}<aside class="trap-box" lang="${showEnglish ? "en" : "fr"}"><strong>${showEnglish ? "Common trap" : "Piège fréquent"}</strong><p>${showEnglish ? trap.en : trap.fr}</p></aside></section>${glossaryKnowledge(q)}<div class="answer-sources"><a href="${sourceUrls[q.source]}" target="_blank" rel="noopener">${sourceLabel} <span aria-hidden="true">↗</span></a>${externalLink}</div>${attribution}`;
   }
 
   function practiceFeedback(q, selected, isReworded) {
@@ -1149,6 +1150,7 @@
       <div class="feedback-explanation"><strong>Pourquoi&nbsp;?</strong><p>${q.explanation}</p></div>
       ${context}
       <aside class="trap-box"><strong>Piège fréquent</strong><p>${trap}</p></aside>
+      ${glossaryKnowledge(q)}
       <div class="answer-sources"><a href="${sourceUrls[q.source]}" target="_blank" rel="noopener">Voir la source officielle <span aria-hidden="true">↗</span></a>${externalLink}</div>
     </section>`;
   }
@@ -1301,6 +1303,7 @@
         })
         .then(data => {
           if (!Array.isArray(data.entrees) || !data.metadata) throw new Error("glossary-invalid");
+          glossaryData = data;
           return data;
         })
         .catch(error => {
@@ -1309,6 +1312,91 @@
         });
     }
     return glossaryDataPromise;
+  }
+
+  const glossaryThemeIds = {
+    t1: "principes_valeurs",
+    t2: "institutions",
+    t3: "droits_devoirs",
+    t4: "histoire_geo_culture",
+    t5: "vie_en_societe"
+  };
+
+  const glossaryAliases = {
+    devise: ["liberte egalite fraternite"],
+    ddhc: ["declaration de 1789", "droits de l homme et du citoyen"],
+    "fete-nationale": ["14 juillet"],
+    "langue-francaise": ["langue francaise", "francais est la langue"],
+    "constitution-1958": ["constitution de 1958"],
+    "recensement-jdc": ["journee defense et citoyennete", "jdc"],
+    "guerres-mondiales": ["11 novembre 1918", "8 mai 1945"],
+    "cinquieme-republique": ["cinquieme republique", "5e republique"],
+    ivg: ["ivg"],
+    pacs: ["pacs"],
+    "assurance-maladie": ["carte vitale"],
+    "numeros-urgence": ["numero d urgence", "numeros d urgence"]
+  };
+
+  function normalizeKnowledgeText(value) {
+    return normalizeSearch(value)
+      .replace(/œ/g, "oe")
+      .replace(/[^a-z0-9]+/g, " ")
+      .trim();
+  }
+
+  function containsKnowledgePhrase(text, phrase) {
+    return ` ${text} `.includes(` ${phrase} `);
+  }
+
+  function glossaryEntryAliases(entry) {
+    const aliases = [normalizeKnowledgeText(entry.terme)];
+    const beforeParenthesis = normalizeKnowledgeText(entry.terme.split("(")[0]);
+    if (beforeParenthesis.length >= 4) aliases.push(beforeParenthesis);
+    for (const match of entry.terme.matchAll(/\(([^)]+)\)/g)) {
+      const parenthetical = normalizeKnowledgeText(match[1]);
+      if (parenthetical.length >= 3) aliases.push(parenthetical);
+    }
+    aliases.push(...(glossaryAliases[entry.slug] || []));
+    return [...new Set(aliases.filter(alias => alias.length >= 3))];
+  }
+
+  function glossaryEntriesForQuestion(q, limit = 3) {
+    if (!glossaryData?.entrees) return [];
+    const question = normalizeKnowledgeText(q.q);
+    const correctAnswer = normalizeKnowledgeText(q.answers?.join(" ") || q.choices?.[q.answer] || "");
+    const broadTerms = new Set(["loi", "maire", "euro", "region", "commune", "parlement", "gouvernement", "republique"]);
+
+    return glossaryData.entrees
+      .map(entry => {
+        let score = 0;
+        const isBroadTerm = broadTerms.has(entry.slug);
+        if (isBroadTerm && glossaryThemeIds[q.theme] !== entry.thematique) return { entry, score };
+        if (entry.slug === "parlement" && containsKnowledgePhrase(question, "parlement europeen")) return { entry, score };
+        for (const alias of glossaryEntryAliases(entry)) {
+          if (containsKnowledgePhrase(question, alias)) score = Math.max(score, 6);
+          else if (!isBroadTerm && containsKnowledgePhrase(correctAnswer, alias)) score = Math.max(score, 4);
+        }
+        if (score && glossaryThemeIds[q.theme] === entry.thematique) score += 1;
+        return { entry, score };
+      })
+      .filter(item => item.score > 0)
+      .sort((a, b) => b.score - a.score || a.entry.terme.localeCompare(b.entry.terme, "fr"))
+      .slice(0, limit)
+      .map(item => item.entry);
+  }
+
+  function glossaryKnowledge(q) {
+    const entries = glossaryEntriesForQuestion(q);
+    if (!entries.length) return "";
+    const items = entries.map(entry => `<article class="knowledge-entry">
+      <h4><a href="#/glossaire?notion=${encodeURIComponent(entry.slug)}">${escapeHtml(entry.terme)}</a></h4>
+      <p>${escapeHtml(entry.definition)}</p>
+      ${entry.reference ? `<p class="knowledge-reference"><strong>Référence :</strong> ${escapeHtml(entry.reference)}</p>` : ""}
+    </article>`).join("");
+    return `<details class="knowledge-panel">
+      <summary>Approfondir avec le glossaire · ${entries.length} notion${entries.length > 1 ? "s" : ""}</summary>
+      <div class="knowledge-content">${items}<p class="source-note">Définitions complémentaires produites par examenciviquenaturalisation.fr et publiées sous Licence Ouverte 2.0.</p></div>
+    </details>`;
   }
 
   function renderHome() {
@@ -1744,7 +1832,7 @@
     }).join("");
     const review = result.ids.map((id, index) => {
       const q = getQuestion(id); const choice = result.answers[id]; const good = choice === q.answer;
-      return `<article class="review-item ${good ? "good" : "bad"}"><div>${tag(q)}</div><h3>${index + 1}. ${q.q}</h3><p><strong>Votre réponse :</strong> ${choice === undefined ? "Aucune réponse" : q.choices[choice]}</p>${!good ? `<p><strong>Bonne réponse :</strong> ${q.choices[q.answer]}</p>` : ""}<p>${q.explanation}</p></article>`;
+      return `<article class="review-item ${good ? "good" : "bad"}"><div>${tag(q)}</div><h3>${index + 1}. ${q.q}</h3><p><strong>Votre réponse :</strong> ${choice === undefined ? "Aucune réponse" : q.choices[choice]}</p>${!good ? `<p><strong>Bonne réponse :</strong> ${q.choices[q.answer]}</p>` : ""}<p>${q.explanation}</p>${glossaryKnowledge(q)}</article>`;
     }).join("");
     layout(`
       <div class="result-hero" style="--result-color:${passed ? "var(--green)" : "var(--orange)"}">
@@ -1941,10 +2029,16 @@
     layout('<div class="empty"><p class="eyebrow">Erreur 404</p><h1>Cette page n’existe pas</h1><a class="button" href="#/">Retour à l’accueil</a></div>', true);
   }
 
-  function router() {
+  async function router() {
     clearInterval(timerId);
     stopSpeech();
     const { path, params } = parseRoute();
+    const routeHash = location.hash;
+    if (["reviser", "entrainement", "resultats"].includes(path) && !glossaryData) {
+      layout('<div class="glossary-loading" role="status">Préparation des ressources pédagogiques…</div>', true);
+      try { await loadGlossaryData(); } catch (_) { /* Le parcours reste utilisable sans le complément. */ }
+      if (location.hash !== routeHash) return;
+    }
     setActiveNav(path);
     if (path === "home") renderHome();
     else if (path === "reviser") renderRevise(params);
