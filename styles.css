@@ -51,7 +51,9 @@ body {
 button, input, select { font: inherit; }
 button, a, select { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 a { color: var(--blue); text-underline-offset: 3px; }
-a:hover { color: var(--blue-hover); }
+@media (hover: hover) and (pointer: fine) {
+  a:hover { color: var(--blue-hover); }
+}
 button:focus-visible, a:focus-visible, select:focus-visible, input:focus-visible {
   outline: 2px solid #0a76f6;
   outline-offset: 2px;
@@ -72,7 +74,10 @@ button:focus-visible, a:focus-visible, select:focus-visible, input:focus-visible
 .brand-mark { display: grid; place-items: center; width: 48px; height: 48px; color: var(--blue); border: 2px solid var(--blue); font-size: .85rem; font-weight: 800; letter-spacing: .04em; }
 .main-nav { display: flex; align-self: stretch; align-items: stretch; }
 .main-nav a { display: flex; align-items: center; padding: 0 1rem; text-decoration: none; color: var(--ink); font-weight: 600; border-bottom: 3px solid transparent; }
-.main-nav a:hover, .main-nav a[aria-current="page"] { color: var(--blue); background: var(--blue-soft); border-bottom-color: var(--blue); }
+.main-nav a[aria-current="page"] { color: var(--blue); background: var(--blue-soft); border-bottom-color: var(--blue); }
+@media (hover: hover) and (pointer: fine) {
+  .main-nav a:hover { color: var(--blue); background: var(--blue-soft); border-bottom-color: var(--blue); }
+}
 .nav-icon { display: none; width: 21px; height: 21px; fill: currentColor; }
 .icon-button { width: 42px; height: 42px; border: 0; background: var(--blue-soft); color: var(--blue); display: grid; place-items: center; cursor: pointer; border-radius: var(--radius); }
 .icon-button svg { width: 22px; fill: currentColor; }
@@ -261,7 +266,7 @@ h3 { font-size: 1.2rem; }
   .main-nav { position: fixed; bottom: 0; left: 0; right: 0; z-index: 60; min-height: calc(64px + env(safe-area-inset-bottom)); padding-bottom: env(safe-area-inset-bottom); background: var(--surface); border-top: 1px solid var(--border); justify-content: space-around; box-shadow: 0 -4px 16px rgba(0, 0, 18, .08); }
   .main-nav a { flex: 1; min-width: 0; min-height: 64px; justify-content: center; flex-direction: column; gap: .15rem; padding: .35rem .2rem; font-size: .72rem; line-height: 1.15; text-align: center; border-top: 3px solid transparent; border-bottom: 0; }
   .nav-icon { display: block; }
-  .main-nav a:hover, .main-nav a[aria-current="page"] { border-top-color: var(--blue); border-bottom: 0; }
+  .main-nav a[aria-current="page"] { border-top-color: var(--blue); border-bottom: 0; }
   main { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
   .page { padding-top: 2rem; padding-bottom: 4rem; }
   .section { margin-top: 3.5rem; }

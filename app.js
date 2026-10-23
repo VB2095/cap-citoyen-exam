@@ -541,8 +541,9 @@
   }
 
   function setActiveNav(path) {
+    const activeSection = path === "resultats" ? "examen" : path;
     document.querySelectorAll("[data-nav]").forEach(link => {
-      const active = path.startsWith(link.dataset.nav);
+      const active = activeSection === link.dataset.nav;
       if (active) link.setAttribute("aria-current", "page");
       else link.removeAttribute("aria-current");
     });
