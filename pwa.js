@@ -5,6 +5,7 @@
   const installDialog = document.querySelector("#install-dialog");
   const updateNotice = document.querySelector("#pwa-update");
   const updateButton = document.querySelector("#apply-update");
+  const connectionStatus = document.querySelector("#connection-status");
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
     || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   const isStandalone = window.matchMedia("(display-mode: standalone)").matches
@@ -12,6 +13,10 @@
   let deferredInstallPrompt = null;
   let waitingWorker = null;
   let refreshing = false;
+  let registration = null;
+  let connectionTimer = null;
+
+  document.documentElement.classList.toggle("is-standalone", isStandalone);
 
   function showInstallButton() {
     if (!isStandalone) installButton.hidden = false;
@@ -46,6 +51,29 @@
 
   if (isIOS && !isStandalone) showInstallButton();
 
+  function updateConnectionStatus(restored = false) {
+    window.clearTimeout(connectionTimer);
+    if (!navigator.onLine) {
+      connectionStatus.textContent = "Mode hors connexion — vos révisions restent disponibles.";
+      connectionStatus.classList.remove("is-online");
+      connectionStatus.hidden = false;
+      return;
+    }
+    if (restored) {
+      connectionStatus.textContent = "Connexion rétablie.";
+      connectionStatus.classList.add("is-online");
+      connectionStatus.hidden = false;
+      connectionTimer = window.setTimeout(() => { connectionStatus.hidden = true; }, 2500);
+      registration?.update();
+      return;
+    }
+    connectionStatus.hidden = true;
+  }
+
+  window.addEventListener("offline", () => updateConnectionStatus());
+  window.addEventListener("online", () => updateConnectionStatus(true));
+  updateConnectionStatus();
+
   function showUpdate(worker) {
     waitingWorker = worker;
     updateNotice.hidden = false;
@@ -58,7 +86,7 @@
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", async () => {
       try {
-        const registration = await navigator.serviceWorker.register("./service-worker.js");
+        registration = await navigator.serviceWorker.register("./service-worker.js");
 
         if (registration.waiting && navigator.serviceWorker.controller) {
           showUpdate(registration.waiting);
@@ -84,6 +112,10 @@
       if (refreshing) return;
       refreshing = true;
       window.location.reload();
+    });
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible" && navigator.onLine) registration?.update();
     });
   }
 })();

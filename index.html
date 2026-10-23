@@ -2,7 +2,7 @@
 <html lang="fr" data-theme="light">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="description" content="Réviser l'examen civique de naturalisation avec des flashcards et des examens blancs conformes au format officiel.">
   <meta name="theme-color" content="#000091">
   <meta name="application-name" content="Cap Citoyen">
@@ -25,9 +25,9 @@
         <span><strong>Cap Citoyen</strong><small>Préparation à l'examen civique</small></span>
       </a>
       <nav class="main-nav" aria-label="Navigation principale">
-        <a href="#/reviser" data-nav="reviser">Réviser</a>
-        <a href="#/entrainement" data-nav="entrainement">S'entraîner</a>
-        <a href="#/examen" data-nav="examen">Examen blanc</a>
+        <a href="#/reviser" data-nav="reviser"><svg class="nav-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M4 4h6a3 3 0 0 1 3 3v13a4 4 0 0 0-4-4H4V4Zm16 0h-6a3 3 0 0 0-3 3v13a4 4 0 0 1 4-4h5V4Z"/></svg><span>Réviser</span></a>
+        <a href="#/entrainement" data-nav="entrainement"><svg class="nav-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 3h6v2h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4V3Zm2 2v2h2V5h-2Zm-3 6v2h8v-2H8Zm0 4v2h5v-2H8Z"/></svg><span>S'entraîner</span></a>
+        <a href="#/examen" data-nav="examen"><svg class="nav-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 1-7.07 2.93A9.97 9.97 0 0 1 12 2Zm0 2a8 8 0 1 0 5.66 2.34A7.95 7.95 0 0 0 12 4Zm1 3v4.59l3.2 3.2-1.41 1.42L11 12.41V7h2Z"/></svg><span>Examen blanc</span></a>
       </nav>
       <button class="icon-button install-button" id="install-app" type="button" aria-label="Installer Cap Citoyen" title="Installer l’application" hidden>
         <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M11 3h2v10.17l3.59-3.58L18 11l-6 6-6-6 1.41-1.41L11 13.17V3Zm-6 16h14v2H5v-2Z"/></svg>
@@ -52,12 +52,14 @@
       </div>
       <nav aria-label="Navigation secondaire">
         <a href="#/sources">Sources officielles</a>
+        <a href="#/confidentialite">Vie privée</a>
         <button class="link-button" id="reset-progress" type="button">Réinitialiser ma progression</button>
       </nav>
     </div>
   </footer>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div class="connection-status" id="connection-status" role="status" aria-live="polite" hidden></div>
 
   <dialog class="install-dialog" id="install-dialog" aria-labelledby="install-dialog-title">
     <form method="dialog">

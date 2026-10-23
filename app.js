@@ -386,12 +386,14 @@
   }
 
   function initialProgress() {
-    return { known: [], review: [], seen: [], schedule: {}, practice: { answered: 0, correct: 0 }, exams: [], lastVisit: null };
+    return { known: [], review: [], seen: [], schedule: {}, practice: { answered: 0, correct: 0 }, exams: [] };
   }
 
   function loadProgress() {
     try {
-      return { ...initialProgress(), ...JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}") };
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+      delete saved.lastVisit;
+      return { ...initialProgress(), ...saved };
     } catch (_) {
       return initialProgress();
     }
@@ -399,7 +401,6 @@
 
   let progress = loadProgress();
   progress.schedule ||= {};
-  progress.lastVisit = new Date().toISOString();
   saveProgress();
 
   function saveProgress() {
@@ -973,6 +974,58 @@
     `, true);
   }
 
+  function renderPrivacy() {
+    layout(`
+      <p class="eyebrow">Vie privée</p>
+      <h1>Vos révisions restent sur votre appareil</h1>
+      <p class="lead">Cap Citoyen ne demande pas de compte et n’utilise ni publicité, ni outil de mesure d’audience, ni traceur de profilage.</p>
+
+      <div class="privacy-list">
+        <section class="privacy-section">
+          <h2>Données enregistrées localement</h2>
+          <p>Votre progression, les cartes à revoir, les échéances de répétition espacée, la session d’examen en cours et votre préférence de thème sont enregistrées dans le stockage de votre navigateur.</p>
+          <p>Ces informations servent uniquement à retrouver votre parcours sur cet appareil. Le code de Cap Citoyen ne les transmet à aucun serveur et ne peut pas les synchroniser avec un autre appareil.</p>
+        </section>
+
+        <section class="privacy-section">
+          <h2>Mode hors connexion</h2>
+          <p>L’application conserve dans un cache technique les fichiers publics nécessaires à son fonctionnement : pages, styles, scripts, icônes et banque de questions. Ce cache ne contient pas votre identité ni votre progression.</p>
+          <p>Il permet d’ouvrir les flashcards et les examens blancs sans connexion. Le navigateur le remplace lorsqu’une nouvelle version de l’application est disponible.</p>
+        </section>
+
+        <section class="privacy-section">
+          <h2>Hébergement et liens externes</h2>
+          <p>Le site est distribué par Netlify. Comme tout hébergeur, Netlify peut traiter les données techniques nécessaires à la livraison et à la sécurisation du service selon sa propre politique de confidentialité.</p>
+          <p>Les sites externes cités dans les sources ne sont contactés que lorsque vous choisissez d’ouvrir leurs liens.</p>
+          <p><a href="https://www.netlify.com/privacy/" target="_blank" rel="noopener">Consulter la politique de confidentialité de Netlify <span aria-hidden="true">↗</span></a></p>
+        </section>
+
+        <section class="privacy-section">
+          <h2>Consentement et suppression</h2>
+          <p>Le stockage utilisé est limité aux fonctions demandées — mémoriser votre progression, votre présentation et rendre l’application disponible hors ligne. Aucun bandeau de consentement publicitaire ou statistique n’est donc affiché.</p>
+          <p><a href="https://www.cnil.fr/fr/cookies-et-autres-traceurs/que-dit-la-loi" target="_blank" rel="noopener">Comprendre les règles relatives aux traceurs sur le site de la CNIL <span aria-hidden="true">↗</span></a></p>
+          <p>Vous pouvez réinitialiser vos données ci-dessous ou supprimer toutes les données du site depuis les réglages de votre navigateur. Désinstaller l’application ne supprime pas nécessairement les données du navigateur associé.</p>
+          <button class="button button-danger" id="erase-local-data" type="button">Effacer ma progression et mes préférences</button>
+        </section>
+      </div>
+
+      <div class="notice"><strong>Notre engagement actuel</strong>Si un outil d’analyse, une publicité, un compte utilisateur ou une synchronisation en ligne est ajouté ultérieurement, cette page et le mécanisme de consentement seront réévalués avant sa mise en service.</div>
+      <p class="source-note">Dernière mise à jour : 23 octobre 2026.</p>
+    `, true);
+
+    document.querySelector("#erase-local-data").addEventListener("click", () => {
+      if (!confirm("Effacer la progression, l’examen en cours et les préférences enregistrées sur cet appareil ?")) return;
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(EXAM_KEY);
+      localStorage.removeItem("cap-citoyen-theme");
+      sessionStorage.removeItem("cap-citoyen-last-result");
+      progress = initialProgress();
+      saveProgress();
+      setupTheme();
+      toast("Données locales réinitialisées");
+    });
+  }
+
   function renderNotFound() {
     layout('<div class="empty"><p class="eyebrow">Erreur 404</p><h1>Cette page n’existe pas</h1><a class="button" href="#/">Retour à l’accueil</a></div>', true);
   }
@@ -987,6 +1040,7 @@
     else if (path === "examen") renderExamLanding();
     else if (path === "resultats") renderResults();
     else if (path === "sources") renderSources();
+    else if (path === "confidentialite") renderPrivacy();
     else renderNotFound();
     document.querySelector("#main").focus({ preventScroll: true });
   }
@@ -1002,6 +1056,7 @@
     const button = document.querySelector(".theme-toggle");
     const dark = document.documentElement.dataset.theme === "dark";
     button.setAttribute("aria-label", dark ? "Activer le thème clair" : "Activer le thème sombre");
+    document.querySelector('meta[name="theme-color"]').setAttribute("content", dark ? "#1e1e1e" : "#000091");
   }
 
   document.querySelector(".theme-toggle").addEventListener("click", () => {

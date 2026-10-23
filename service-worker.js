@@ -1,4 +1,4 @@
-const CACHE_NAME = "cap-citoyen-v1";
+const CACHE_NAME = "cap-citoyen-v2";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -32,7 +32,10 @@ self.addEventListener("message", event => {
 
 async function networkFirst(request) {
   try {
-    const response = await fetch(request);
+    const timeout = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error("network-timeout")), 3500);
+    });
+    const response = await Promise.race([fetch(request), timeout]);
     if (response.ok) {
       const cache = await caches.open(CACHE_NAME);
       cache.put(request, response.clone());
