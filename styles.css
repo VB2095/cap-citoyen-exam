@@ -380,7 +380,7 @@ h3 { font-size: 1.2rem; }
   .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .toolbar { margin: 2rem 0; padding: 1.25rem; }
   .question-topbar { position: sticky; top: calc(68px + env(safe-area-inset-top)); z-index: 35; margin: 0 -.5rem 1rem; padding: .65rem .5rem; background: var(--surface); border-bottom: 1px solid var(--border); }
-  .exam-question-shell .question-topbar { padding-top: 0; }
+  .exam-question-shell .question-topbar { padding-top: .5rem; }
   .exam-map { flex-wrap: nowrap; overflow-x: auto; padding: .25rem .1rem .75rem; scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch; }
   .exam-map button { flex: 0 0 44px; width: 44px; height: 44px; scroll-snap-align: center; }
   .exam-question-shell { margin-top: 0; padding-bottom: 78px; }
