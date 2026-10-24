@@ -11,6 +11,7 @@
   const EXAM_KEY = "cap-citoyen-active-exam-v1";
   const LETTERS = ["A", "B", "C", "D"];
   let timerId = null;
+  let toastTimer = null;
   let flashSession = null;
   let practiceSession = null;
   let activeUtterance = null;
@@ -1244,9 +1245,16 @@
 
   function toast(message) {
     const el = document.querySelector("#toast");
+    window.clearTimeout(toastTimer);
     el.textContent = message;
+    el.hidden = false;
     el.classList.add("show");
-    window.setTimeout(() => el.classList.remove("show"), 2300);
+    toastTimer = window.setTimeout(() => {
+      el.classList.remove("show");
+      window.setTimeout(() => {
+        if (!el.classList.contains("show")) el.hidden = true;
+      }, 250);
+    }, 2300);
   }
 
   function parseRoute() {
@@ -1751,7 +1759,7 @@
     const isReworded = displayedQuestion !== q.q;
     const selected = exam.answers[q.id];
     const officialMode = (exam.mode || "mixed") === "official";
-    layout(`<div class="question-shell">
+    layout(`<div class="question-shell exam-question-shell">
       <div class="question-topbar"><div><strong>Examen blanc</strong><br><span>Question ${exam.index + 1} sur 40</span></div><span class="timer" id="exam-timer" role="timer">45:00</span></div>
       <div class="progress"><span style="--progress:${percent(Object.keys(exam.answers).length, 40) / 100}"></span></div>
       <div class="exam-map" aria-label="Navigation entre les questions">${exam.ids.map((id, i) => `<button type="button" data-exam-index="${i}" class="${i === exam.index ? "current" : ""} ${exam.answers[id] !== undefined ? "answered" : ""} ${exam.flagged.includes(id) ? "flagged" : ""}" aria-label="Question ${i + 1}${exam.answers[id] !== undefined ? ", répondue" : ""}" ${i === exam.index ? 'aria-current="step"' : ""}>${i + 1}</button>`).join("")}</div>
@@ -1765,6 +1773,7 @@
         </div>
       </article>
     </div>`, true, !preserveScroll);
+    centerCurrentExamStep();
     startTimer();
     bindSpeechButton(displayedQuestion);
     document.querySelectorAll("[data-exam-choice]").forEach(btn => btn.addEventListener("click", () => {
@@ -1782,6 +1791,16 @@
       if (!unanswered || confirm(`Il reste ${unanswered} question${unanswered > 1 ? "s" : ""} sans réponse. Terminer quand même ?`)) finishExam(false);
     });
     focusRendered(focusTarget);
+  }
+
+  function centerCurrentExamStep() {
+    window.requestAnimationFrame(() => {
+      const map = document.querySelector(".exam-map");
+      const current = map?.querySelector('[aria-current="step"]');
+      if (!map || !current || map.scrollWidth <= map.clientWidth) return;
+      const centeredLeft = current.offsetLeft - (map.clientWidth - current.offsetWidth) / 2;
+      map.scrollTo({ left: Math.max(0, centeredLeft), behavior: "auto" });
+    });
   }
 
   function startTimer() {
