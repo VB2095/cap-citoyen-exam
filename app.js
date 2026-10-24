@@ -1272,9 +1272,9 @@
     });
   }
 
-  function layout(content, narrow = false, scrollToTop = true) {
+  function layout(content, narrow = false, scrollToTop = true, pageClass = "") {
     const scrollTop = window.scrollY;
-    app.innerHTML = `<div class="page ${narrow ? "page-narrow" : ""}">${content}</div>`;
+    app.innerHTML = `<div class="page ${narrow ? "page-narrow" : ""} ${pageClass}">${content}</div>`;
     window.scrollTo({ top: scrollToTop ? 0 : scrollTop, behavior: "instant" });
   }
 
@@ -1779,7 +1779,7 @@
           ${exam.index === 39 ? '<button class="button" id="finish-exam" type="button">Terminer l’examen</button>' : '<button class="button" id="exam-next" type="button">Suivante →</button>'}
         </div>
       </article>
-    </div>`, true, !preserveScroll);
+    </div>`, true, !preserveScroll, "exam-page");
     centerCurrentExamStep();
     startTimer();
     bindSpeechButton(displayedQuestion);
