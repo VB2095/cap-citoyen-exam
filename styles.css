@@ -372,7 +372,7 @@ h3 { font-size: 1.2rem; }
   .nav-icon { display: block; }
   .main-nav a[aria-current="page"] { border-top-color: var(--blue); border-bottom: 0; }
   main { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
-  .page { padding-top: 2rem; padding-bottom: 4rem; }
+  .page { padding-top: 0.4rem; padding-bottom: 4rem; }
   .section { margin-top: 3.5rem; }
   .hero { grid-template-columns: 1fr; gap: 2rem; }
   .grid { grid-template-columns: 1fr 1fr; }
@@ -381,7 +381,7 @@ h3 { font-size: 1.2rem; }
   .question-topbar { position: sticky; top: calc(68px + env(safe-area-inset-top)); z-index: 35; margin: 0 -.5rem 1rem; padding: .65rem .5rem; background: var(--surface); border-bottom: 1px solid var(--border); }
   .exam-map { flex-wrap: nowrap; overflow-x: auto; padding: .25rem .1rem .75rem; scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch; }
   .exam-map button { flex: 0 0 44px; width: 44px; height: 44px; scroll-snap-align: center; }
-  .exam-question-shell { padding-bottom: 78px; }
+  .exam-question-shell { margin-top: 0; padding-bottom: 78px; }
   .exam-question-shell .question-nav { position: fixed; z-index: 55; right: 0; bottom: calc(64px + env(safe-area-inset-bottom)); left: 0; display: flex; flex-direction: row; gap: .75rem; margin: 0; padding: .65rem max(1rem, calc((100vw - 860px) / 2)); background: var(--surface); border-top: 1px solid var(--border); box-shadow: 0 -4px 16px rgba(0, 0, 18, .12); }
   .exam-question-shell .question-nav .button { flex: 1 1 0; width: auto; min-width: 0; }
   .choice { min-height: 56px; }
