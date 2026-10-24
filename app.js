@@ -1562,10 +1562,16 @@
     bindSpeechButton(displayedQuestion);
     document.querySelector("#flip-card")?.addEventListener("click", () => { flashSession.revealed = true; uniquePush(progress.seen, q.id); saveProgress(); renderFlashcard(".answer"); });
     document.querySelector("#toggle-translation")?.addEventListener("click", () => { flashSession.translations[q.id] = !flashSession.translations[q.id]; renderFlashcard("#toggle-translation"); });
-    document.querySelector("#prev-card").addEventListener("click", () => { flashSession.index--; flashSession.revealed = false; renderFlashcard("#flash-question"); });
-    document.querySelector("#next-card").addEventListener("click", () => { flashSession.index++; flashSession.revealed = false; renderFlashcard("#flash-question"); });
+    document.querySelector("#prev-card").addEventListener("click", () => { flashSession.index--; flashSession.revealed = false; renderFlashcard("#flash-question"); scrollToFlashcardStart(); });
+    document.querySelector("#next-card").addEventListener("click", () => { flashSession.index++; flashSession.revealed = false; renderFlashcard("#flash-question"); scrollToFlashcardStart(); });
     document.querySelectorAll("[data-rating]").forEach(button => button.addEventListener("click", () => rateCard(q.id, button.dataset.rating)));
     focusRendered(focusTarget);
+  }
+
+  function scrollToFlashcardStart() {
+    if (!window.matchMedia("(max-width: 800px)").matches) return;
+    const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+    window.requestAnimationFrame(() => document.querySelector("#flash-zone")?.scrollIntoView({ behavior, block: "start" }));
   }
 
   function rateCard(id, rating) {
@@ -1601,6 +1607,7 @@
     flashSession.index++;
     flashSession.revealed = false;
     renderFlashcard("#flash-question");
+    scrollToFlashcardStart();
   }
 
   function renderPractice() {
