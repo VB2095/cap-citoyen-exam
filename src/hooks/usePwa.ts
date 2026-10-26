@@ -8,14 +8,44 @@ interface InstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
+type InstallPromptListener = (prompt: InstallPromptEvent | null) => void;
+
+let capturedInstallPrompt: InstallPromptEvent | null = null;
+const installPromptListeners = new Set<InstallPromptListener>();
+
+const notifyInstallPromptListeners = () => {
+  installPromptListeners.forEach((listener) => listener(capturedInstallPrompt));
+};
+
+window.addEventListener("beforeinstallprompt", (event) => {
+  event.preventDefault();
+  capturedInstallPrompt = event as InstallPromptEvent;
+  notifyInstallPromptListeners();
+});
+
+window.addEventListener("appinstalled", () => {
+  capturedInstallPrompt = null;
+  notifyInstallPromptListeners();
+});
+
+const subscribeToInstallPrompt = (listener: InstallPromptListener) => {
+  installPromptListeners.add(listener);
+  listener(capturedInstallPrompt);
+  return () => {
+    installPromptListeners.delete(listener);
+  };
+};
+
 export function usePwa() {
-  const [installPrompt, setInstallPrompt] = useState<InstallPromptEvent | null>(null);
-  const [iosDialogOpen, setIosDialogOpen] = useState(false);
+  const [installPrompt, setInstallPrompt] = useState<InstallPromptEvent | null>(capturedInstallPrompt);
+  const [installDialogOpen, setInstallDialogOpen] = useState(false);
+  const [installed, setInstalled] = useState(false);
   const [onlineMessage, setOnlineMessage] = useState("");
   const [updated, setUpdated] = useState(false);
   const onlineTimer = useRef<number | null>(null);
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
     || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const isMobileInstall = isIOS || /Android/i.test(navigator.userAgent) || window.matchMedia("(max-width: 800px)").matches;
   const isStandalone = window.matchMedia("(display-mode: standalone)").matches
     || (navigator as Navigator & { standalone?: boolean }).standalone === true;
 
@@ -25,18 +55,14 @@ export function usePwa() {
 
   useEffect(() => {
     document.documentElement.classList.toggle("is-standalone", isStandalone);
-    const beforeInstall = (event: Event) => {
-      event.preventDefault();
-      setInstallPrompt(event as InstallPromptEvent);
-    };
-    const installed = () => setInstallPrompt(null);
-    window.addEventListener("beforeinstallprompt", beforeInstall);
-    window.addEventListener("appinstalled", installed);
-    return () => {
-      window.removeEventListener("beforeinstallprompt", beforeInstall);
-      window.removeEventListener("appinstalled", installed);
-    };
+    return subscribeToInstallPrompt(setInstallPrompt);
   }, [isStandalone]);
+
+  useEffect(() => {
+    const handleInstalled = () => setInstalled(true);
+    window.addEventListener("appinstalled", handleInstalled);
+    return () => window.removeEventListener("appinstalled", handleInstalled);
+  }, []);
 
   useEffect(() => {
     const previousVersion = localStorage.getItem(VERSION_KEY);
@@ -71,23 +97,31 @@ export function usePwa() {
     };
   }, []);
 
-  const canInstall = !isStandalone && (Boolean(installPrompt) || isIOS);
+  const canInstall = !isStandalone && !installed;
 
   const install = async () => {
     if (installPrompt) {
-      await installPrompt.prompt();
-      await installPrompt.userChoice;
-      setInstallPrompt(null);
+      try {
+        await installPrompt.prompt();
+        const choice = await installPrompt.userChoice;
+        if (choice.outcome === "accepted") setInstalled(true);
+      } catch {
+        setInstallDialogOpen(true);
+      } finally {
+        capturedInstallPrompt = null;
+        notifyInstallPromptListeners();
+      }
       return;
     }
-    if (isIOS) setIosDialogOpen(true);
+    setInstallDialogOpen(true);
   };
 
   return {
     canInstall,
     install,
-    iosDialogOpen,
-    setIosDialogOpen,
+    installDialogOpen,
+    setInstallDialogOpen,
+    installPlatform: isIOS ? "ios" : isMobileInstall ? "mobile" : "desktop",
     onlineMessage,
     needRefresh,
     updated,

@@ -25,6 +25,7 @@ const navigation = [
 export function AppShell({ children }: PropsWithChildren) {
   const location = useLocation();
   const mainRef = useRef<HTMLElement>(null);
+  const installDialogRef = useRef<HTMLDialogElement>(null);
   const { colorTheme, toggleTheme, resetData } = useApp();
   const pwa = usePwa();
   const activePath = location.pathname === "/resultats" ? "/examen" : location.pathname;
@@ -33,6 +34,17 @@ export function AppShell({ children }: PropsWithChildren) {
     window.scrollTo({ top: 0, behavior: "instant" });
     mainRef.current?.focus({ preventScroll: true });
   }, [location.pathname]);
+
+  useEffect(() => {
+    const dialog = installDialogRef.current;
+    if (!dialog) return;
+    if (pwa.installDialogOpen && !dialog.open) {
+      if (typeof dialog.showModal === "function") dialog.showModal();
+      else dialog.setAttribute("open", "");
+    } else if (!pwa.installDialogOpen && dialog.open) {
+      dialog.close();
+    }
+  }, [pwa.installDialogOpen]);
 
   const confirmReset = () => {
     if (!window.confirm("Supprimer toute la progression enregistrée sur cet appareil ?")) return;
@@ -98,16 +110,26 @@ export function AppShell({ children }: PropsWithChildren) {
         </div>
       )}
 
-      <dialog className="install-dialog" aria-labelledby="install-dialog-title" open={pwa.iosDialogOpen}>
-        <form method="dialog" onSubmit={() => pwa.setIosDialogOpen(false)}>
-          <button className="dialog-close" value="close" aria-label="Fermer" onClick={() => pwa.setIosDialogOpen(false)}>×</button>
-          <p className="eyebrow">Installation sur iPhone et iPad</p>
-          <h2 id="install-dialog-title">Ajouter Cap Citoyen à l’écran d’accueil</h2>
-          <ol className="install-steps">
+      <dialog ref={installDialogRef} className="install-dialog" aria-labelledby="install-dialog-title" onClose={() => pwa.setInstallDialogOpen(false)}>
+        <form method="dialog">
+          <button className="dialog-close" value="close" aria-label="Fermer">×</button>
+          <p className="eyebrow">Installer l’application</p>
+          <h2 id="install-dialog-title">
+            {pwa.installPlatform === "ios" ? "Ajouter Cap Citoyen à l’écran d’accueil" : pwa.installPlatform === "mobile" ? "Installer Cap Citoyen sur ce mobile" : "Installer Cap Citoyen sur cet ordinateur"}
+          </h2>
+          {pwa.installPlatform === "ios" ? <ol className="install-steps">
             <li>Ouvrez cette page dans Safari si nécessaire, puis touchez le bouton <strong>Partager</strong>.</li>
             <li>Faites défiler les actions puis choisissez <strong>Sur l’écran d’accueil</strong>.</li>
             <li>Confirmez avec <strong>Ajouter</strong>.</li>
-          </ol>
+          </ol> : pwa.installPlatform === "mobile" ? <ol className="install-steps">
+            <li>Ouvrez le menu de votre navigateur.</li>
+            <li>Choisissez <strong>Installer l’application</strong> ou <strong>Ajouter à l’écran d’accueil</strong>.</li>
+            <li>Confirmez l’installation.</li>
+          </ol> : <ol className="install-steps">
+            <li>Dans Chrome ou Edge, utilisez l’icône d’installation dans la barre d’adresse ou l’option <strong>Installer Cap Citoyen</strong> du menu.</li>
+            <li>Dans Safari sur macOS, choisissez <strong>Fichier → Ajouter au Dock</strong>.</li>
+            <li>Si l’option n’apparaît pas, rechargez la page dans un navigateur compatible.</li>
+          </ol>}
           <p className="dialog-note">L’application pourra ensuite être ouverte comme une application classique et continuera de fonctionner hors connexion.</p>
           <button className="button" value="close">J’ai compris</button>
         </form>
