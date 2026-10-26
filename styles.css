@@ -202,7 +202,7 @@ h3 { font-size: 1.2rem; }
 .listen-button:hover, .listen-button.is-speaking { background: var(--blue-soft); }
 .listen-button svg { width: 20px; height: 20px; fill: currentColor; }
 .flashcard h2 { max-width: 680px; margin-bottom: 1.75rem; }
-.flashcard .answer { width: 100%; border-top: 1px solid var(--border); padding-top: 1.75rem; margin-top: .25rem; max-width: 680px; text-align: left; }
+.flashcard .answer { width: 100%; border-top: 1px solid var(--border); padding-top: 1.75rem; margin-top: .25rem; max-width: 680px; text-align: left; scroll-margin-top: 1rem; }
 .flashcard .answer, .short-answer, .accepted-answers, .explanation-box, .trap-box, .answer-sources { min-width: 0; overflow-wrap: anywhere; }
 .flashcard .answer > *:first-child { margin-top: 0; }
 .short-answer { display: grid; gap: .45rem; padding: 1rem 1.15rem; background: var(--surface-alt); border-top: 3px solid var(--green); }

@@ -24,6 +24,7 @@ export function RevisePage() {
   const { progress, setProgress, showToast } = useApp();
   const { data: glossaryData } = useGlossary();
   const zoneRef = useRef<HTMLDivElement>(null);
+  const answerRef = useRef<HTMLDivElement>(null);
   const [theme, setTheme] = useState(() => params.get("theme") && themes[params.get("theme") as keyof typeof themes] ? params.get("theme")! : "all");
   const [filter, setFilter] = useState(() => ["all", "review", "due", "unseen", "known"].includes(params.get("filter") ?? "") ? params.get("filter")! : "all");
   const [origin, setOrigin] = useState("all");
@@ -73,6 +74,9 @@ export function RevisePage() {
     if (!question) return;
     setProgress((current) => ({ ...current, seen: unique([...current.seen, question.id]) }));
     setSession((current) => ({ ...current, revealed: true }));
+    if (window.matchMedia("(max-width: 800px)").matches) {
+      window.requestAnimationFrame(() => scrollToElement(answerRef.current));
+    }
   };
 
   const rate = (rating: Rating) => {
@@ -118,7 +122,7 @@ export function RevisePage() {
                 <div className="flash-tags"><QuestionTags question={question} reworded={isReworded} /></div>
                 <SpeechButton text={displayedQuestion} />
                 <h2 id="flash-question" tabIndex={-1}>{displayedQuestion}</h2>
-                {session.revealed ? <div className="answer" aria-label="Réponse affichée">
+                {session.revealed ? <div ref={answerRef} className="answer" aria-label="Réponse affichée">
                   {isReworded && <p className="official-wording"><strong>Formulation officielle :</strong> {question.q}</p>}
                   <FlashAnswer question={question} english={Boolean(session.translations[question.id])} glossary={glossary} onToggleEnglish={() => setSession((current) => ({ ...current, translations: { ...current.translations, [question.id]: !current.translations[question.id] } }))} />
                 </div> : <button className="button button-secondary reveal-button" type="button" aria-expanded="false" onClick={reveal}>Afficher la réponse</button>}
