@@ -108,7 +108,7 @@ export function RevisePage() {
         <div className="field"><label htmlFor="flash-wording">Formulation</label><select id="flash-wording" value={wording} onChange={(event) => setWording(event.target.value)}><option value="mixed">Mixte : d’origine et reformulée</option><option value="original">Toujours la formulation d’origine</option><option value="alternate">Reformulée si disponible</option></select></div>
         <button className="button" type="button" onClick={() => start(true)}>Lancer la révision</button>
       </div>
-      <div ref={zoneRef}>
+      <div id="flash-zone" ref={zoneRef}>
         {!session.ids.length ? <div className="empty"><h2>Aucune carte ici</h2><p>Essayez un autre filtre ou un autre thème.</p></div>
           : !question ? <div className="result-hero" style={{ "--result-color": "var(--green)" } as React.CSSProperties}><p className="eyebrow">Session terminée</p><h2>Révision enregistrée</h2><p>Les prochaines cartes seront proposées selon vos réponses et leur date de révision.</p><button className="button" type="button" onClick={() => start(true)}>Nouvelle session</button></div>
             : <div className="study-shell">
