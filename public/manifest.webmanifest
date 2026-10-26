@@ -5,8 +5,8 @@
   "description": "Flashcards, entraînements et examens blancs pour préparer l’examen civique de naturalisation française.",
   "lang": "fr-FR",
   "dir": "ltr",
-  "start_url": "./#/",
-  "scope": "./",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#ffffff",
@@ -36,13 +36,13 @@
     {
       "name": "Réviser les flashcards",
       "short_name": "Réviser",
-      "url": "./#/reviser",
+      "url": "/reviser",
       "icons": [{ "src": "icons/icon-192-v3.png", "sizes": "192x192", "type": "image/png" }]
     },
     {
       "name": "Lancer un examen blanc",
       "short_name": "Examen blanc",
-      "url": "./#/examen",
+      "url": "/examen",
       "icons": [{ "src": "icons/icon-192-v3.png", "sizes": "192x192", "type": "image/png" }]
     }
   ]
