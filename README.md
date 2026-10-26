@@ -1,6 +1,6 @@
 # Cap Citoyen
 
-Application statique de révision de l’examen civique pour la naturalisation française.
+Application de révision de l’examen civique pour la naturalisation française, développée avec React, TypeScript et Vite.
 
 ## Fonctionnalités
 
@@ -24,13 +24,38 @@ Application statique de révision de l’examen civique pour la naturalisation f
 
 ## Prévisualisation locale
 
-Le projet n’a aucune dépendance. Ouvrir `index.html` directement ou servir ce dossier avec un serveur statique.
+Prérequis : Node.js 22.18 ou une version ultérieure.
 
-Les fonctions PWA (installation et mode hors connexion) nécessitent un serveur HTTP local ou un hébergement HTTPS. Elles ne sont pas actives en ouvrant directement le fichier avec `file://`.
+```bash
+npm install
+npm run dev
+```
 
-Lorsqu’un fichier essentiel est modifié, incrémenter le numéro de `CACHE_NAME` dans `service-worker.js` afin que l’application propose la nouvelle version aux utilisateurs déjà installés.
+La commande affiche l’adresse locale à ouvrir dans le navigateur. Les fonctions PWA complètes nécessitent une prévisualisation de production ou un hébergement HTTPS :
+
+```bash
+npm run build
+npm run preview
+```
+
+Autres commandes utiles :
+
+```bash
+npm test
+```
+
+## Déploiement
+
+Le projet est configuré pour Netlify dans `netlify.toml` :
+
+- commande de build : `npm run build` ;
+- dossier publié : `dist` ;
+- version de Node.js : 22 ;
+- redirection des routes vers `index.html` pour React Router.
+
+La PWA et son service worker sont générés automatiquement pendant le build.
 
 
 ## Mise à jour éditoriale
 
-La banque officielle se trouve dans `official-bank.js`. Les intitulés viennent du ministère de l’Intérieur. Les réponses sont des propositions pédagogiques indépendantes de leqcmcivique.fr, réutilisées sous Licence Ouverte 2.0 avec attribution. Les QCM et mises en situation complémentaires se trouvent dans `questions.js`.
+La banque officielle se trouve dans `official-bank.js`. Les intitulés viennent du ministère de l’Intérieur. Les réponses sont des propositions pédagogiques indépendantes de leqcmcivique.fr, réutilisées sous Licence Ouverte 2.0 avec attribution. Les QCM et mises en situation complémentaires se trouvent dans `questions.js`. La couche pédagogique et les associations avec le glossaire se trouvent dans `src/knowledge-engine.js`.
