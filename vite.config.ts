@@ -16,6 +16,7 @@ export default defineConfig({
       manifest: false,
       workbox: {
         globPatterns: ["**/*.{js,css,html,png,json,webmanifest}"],
+        globIgnores: ["social-preview.png"],
         navigateFallback: "/index.html",
         cleanupOutdatedCaches: true,
       },
