@@ -61,7 +61,11 @@ La PWA et son service worker sont générés automatiquement pendant le build.
 
 La banque officielle se trouve dans `official-bank.js`. Les intitulés viennent du ministère de l’Intérieur. Les réponses sont des propositions pédagogiques indépendantes de leqcmcivique.fr, réutilisées sous Licence Ouverte 2.0 avec attribution. Les QCM et mises en situation complémentaires se trouvent dans `questions.js`. La couche pédagogique et les associations avec le glossaire se trouvent dans `src/knowledge-engine.js`.
 
-#English 
+
+------------------------
+
+
+# English 
 
 # Cap Citoyen
 https://cap-citoyen.netlify.app/
